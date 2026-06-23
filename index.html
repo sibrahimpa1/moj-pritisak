@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="theme-color" content="#4F7970">
   <title>Moj Pritisak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1114,6 +1116,82 @@
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       color: var(--text);
+    }
+
+    .period-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .period-table th,
+    .period-table td {
+      padding: 10px 8px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .period-table th:first-child,
+    .period-table td:first-child {
+      text-align: left;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .period-table th {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .period-table tbody tr:last-child td { border-bottom: none; }
+
+    .period-table .num {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.05rem;
+    }
+
+    .period-table .sub {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+      margin-top: 8px;
+    }
+
+    .chart-wrap.tall { height: 300px; }
+
+    .chart-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    .probiotic-day-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .probiotic-day-tag {
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-weight: 600;
     }
 
     .spinner {
@@ -2241,10 +2319,335 @@
     });
 
     // Trendovi view
+    let trendCharts = [];
+
+    function destroyTrendCharts() {
+      trendCharts.forEach(c => c.destroy());
+      trendCharts = [];
+    }
+
+    function getPeriodRanges() {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterdayStart = new Date(todayStart);
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+      const weekStart = new Date(todayStart);
+      weekStart.setDate(weekStart.getDate() - 7);
+      const monthStart = new Date(todayStart);
+      monthStart.setDate(monthStart.getDate() - 30);
+      return {
+        yesterday: { start: yesterdayStart, end: todayStart, exclusiveEnd: true, divisor: 1 },
+        week: { start: weekStart, end: now, exclusiveEnd: false, divisor: 7 },
+        month: { start: monthStart, end: now, exclusiveEnd: false, divisor: 30 }
+      };
+    }
+
+    function filterInPeriod(items, field, periodKey) {
+      const range = getPeriodRanges()[periodKey];
+      return items.filter(item => {
+        const t = new Date(item[field]).getTime();
+        if (range.exclusiveEnd) return t >= range.start.getTime() && t < range.end.getTime();
+        return t >= range.start.getTime() && t <= range.end.getTime();
+      });
+    }
+
+    function avgField(arr, field) {
+      return arr.length ? Math.round(arr.reduce((s, x) => s + x[field], 0) / arr.length) : null;
+    }
+
+    function avgBP(items) {
+      return {
+        sys: avgField(items, 'systolic'),
+        dia: avgField(items, 'diastolic'),
+        pulse: avgField(items, 'pulse'),
+        count: items.length
+      };
+    }
+
+    function avgBowelStats(items, divisor) {
+      if (!items.length) return { count: 0, perDay: null, avgType: null };
+      const avgType = Math.round((items.reduce((s, b) => s + b.type, 0) / items.length) * 10) / 10;
+      return {
+        count: items.length,
+        perDay: Math.round((items.length / divisor) * 10) / 10,
+        avgType
+      };
+    }
+
+    function fmtNum(n) {
+      return n == null ? '—' : String(n);
+    }
+
+    function renderPeriodCell(value, sub) {
+      const subHtml = sub ? `<span class="sub">${sub}</span>` : '';
+      return `<td><span class="num">${value}</span>${subHtml}</td>`;
+    }
+
+    function renderBPPeriodTable(measurements) {
+      const periods = ['yesterday', 'week', 'month'];
+      const labels = { yesterday: 'Jučer', week: '7 dana', month: '30 dana' };
+      const rows = [
+        { label: 'Sistolni', field: 'sys' },
+        { label: 'Dijastolni', field: 'dia' },
+        { label: 'Puls', field: 'pulse' }
+      ];
+      const stats = {};
+      periods.forEach(p => { stats[p] = avgBP(filterInPeriod(measurements, 'measured_at', p)); });
+
+      let body = rows.map(row => {
+        const cells = periods.map(p => renderPeriodCell(fmtNum(stats[p][row.field]), stats[p].count ? `${stats[p].count} mj.` : null)).join('');
+        return `<tr><td>${row.label}</td>${cells}</tr>`;
+      }).join('');
+
+      const header = periods.map(p => `<th>${labels[p]}</th>`).join('');
+      return `<div class="stat-card"><h3>Pritisak — prosjeci</h3>
+        <table class="period-table"><thead><tr><th></th>${header}</tr></thead><tbody>${body}</tbody></table></div>`;
+    }
+
+    function renderBowelPeriodTable(bowel) {
+      const periods = ['yesterday', 'week', 'month'];
+      const labels = { yesterday: 'Jučer', week: '7 dana', month: '30 dana' };
+      const ranges = getPeriodRanges();
+      const stats = {};
+      periods.forEach(p => {
+        stats[p] = avgBowelStats(filterInPeriod(bowel, 'recorded_at', p), ranges[p].divisor);
+      });
+
+      const rows = [
+        {
+          label: 'Broj unosa',
+          render: p => renderPeriodCell(fmtNum(stats[p].count), p === 'yesterday' ? null : `${stats[p].perDay ?? '—'}/dan`)
+        },
+        {
+          label: 'Prosj. tip (1–7)',
+          render: p => renderPeriodCell(fmtNum(stats[p].avgType), stats[p].avgType != null ? getBowelType(Math.round(stats[p].avgType)).label.split(' ')[0] : null)
+        }
+      ];
+
+      const body = rows.map(row => {
+        const cells = periods.map(p => row.render(p)).join('');
+        return `<tr><td>${row.label}</td>${cells}</tr>`;
+      }).join('');
+
+      const header = periods.map(p => `<th>${labels[p]}</th>`).join('');
+      return `<div class="stat-card"><h3>Stolica — prosjeci</h3>
+        <table class="period-table"><thead><tr><th></th>${header}</tr></thead><tbody>${body}</tbody></table>
+        <p class="chart-note">Tip 4 = normalno. Niži prosjek nakon probiotika može značiti poboljšanje ako ste imali kašasto (6–7).</p></div>`;
+    }
+
+    function analyzeProbioticBowel(probiotics, bowel) {
+      const emptyBucket = () => ({ doses: 0, types: [], counts: [] });
+      const result = {};
+      PROBIOTIC_TYPES.forEach(t => {
+        result[t.key] = { label: t.label, morning: emptyBucket(), evening: emptyBucket(), all: emptyBucket() };
+      });
+
+      probiotics.forEach(entry => {
+        const takenAt = new Date(entry.taken_at);
+        const isMorning = takenAt.getHours() < 12;
+        const windowEnd = new Date(takenAt.getTime() + 24 * 60 * 60 * 1000);
+        const bowelAfter = bowel.filter(b => {
+          const t = new Date(b.recorded_at);
+          return t >= takenAt && t < windowEnd;
+        });
+        const avgType = bowelAfter.length
+          ? bowelAfter.reduce((s, b) => s + b.type, 0) / bowelAfter.length
+          : null;
+
+        (Array.isArray(entry.types) ? entry.types : []).forEach(typeKey => {
+          if (!result[typeKey]) return;
+          const timeKey = isMorning ? 'morning' : 'evening';
+          [result[typeKey].all, result[typeKey][timeKey]].forEach(bucket => {
+            bucket.doses++;
+            if (avgType != null) bucket.types.push(avgType);
+            bucket.counts.push(bowelAfter.length);
+          });
+        });
+      });
+
+      const finalize = bucket => ({
+        doses: bucket.doses,
+        avgType: bucket.types.length
+          ? Math.round((bucket.types.reduce((a, b) => a + b, 0) / bucket.types.length) * 10) / 10
+          : null,
+        avgCount: bucket.counts.length
+          ? Math.round((bucket.counts.reduce((a, b) => a + b, 0) / bucket.counts.length) * 10) / 10
+          : null
+      });
+
+      Object.keys(result).forEach(key => {
+        const r = result[key];
+        r.morning = finalize(r.morning);
+        r.evening = finalize(r.evening);
+        r.all = finalize(r.all);
+      });
+      return result;
+    }
+
+    function buildDailyTimeline(bowel, probiotics, days = 30) {
+      const rows = [];
+      const now = new Date();
+      for (let i = days - 1; i >= 0; i--) {
+        const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        day.setDate(day.getDate() - i);
+        const key = localDateKey(day);
+        const dayBowel = bowel.filter(b => localDateKey(b.recorded_at) === key);
+        const dayProbiotics = probiotics.filter(p => localDateKey(p.taken_at) === key);
+        rows.push({
+          label: `${day.getDate()}.${day.getMonth() + 1}.`,
+          count: dayBowel.length,
+          avgType: dayBowel.length
+            ? Math.round((dayBowel.reduce((s, b) => s + b.type, 0) / dayBowel.length) * 10) / 10
+            : null,
+          probioticCount: dayProbiotics.length
+        });
+      }
+      return rows;
+    }
+
+    async function loadChartJs() {
+      if (window.Chart) return;
+      await loadScript('https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js');
+    }
+
+    function renderProbioticCharts(probiotics, bowel) {
+      if (!window.Chart) return;
+
+      const analysis = analyzeProbioticBowel(probiotics, bowel);
+      const active = PROBIOTIC_TYPES.filter(t => analysis[t.key].all.doses > 0);
+      if (!active.length) return;
+
+      const labels = active.map(t => t.label);
+      const morningTypes = active.map(t => analysis[t.key].morning.avgType);
+      const eveningTypes = active.map(t => analysis[t.key].evening.avgType);
+      const morningCounts = active.map(t => analysis[t.key].morning.avgCount);
+      const eveningCounts = active.map(t => analysis[t.key].evening.avgCount);
+
+      const typeCanvas = document.getElementById('chart-probiotic-type');
+      if (typeCanvas) {
+        trendCharts.push(new Chart(typeCanvas, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Jutro (<12h)', data: morningTypes, backgroundColor: '#FF6B8B', borderRadius: 6 },
+              { label: 'Večer (≥12h)', data: eveningTypes, backgroundColor: '#4F7970', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+            },
+            scales: {
+              y: {
+                min: 1,
+                max: 7,
+                ticks: { stepSize: 1 },
+                title: { display: true, text: 'Bristol tip (24h poslije)' }
+              }
+            }
+          }
+        }));
+      }
+
+      const countCanvas = document.getElementById('chart-probiotic-count');
+      if (countCanvas) {
+        trendCharts.push(new Chart(countCanvas, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Jutro (<12h)', data: morningCounts, backgroundColor: 'rgba(255,107,139,0.75)', borderRadius: 6 },
+              { label: 'Večer (≥12h)', data: eveningCounts, backgroundColor: 'rgba(79,121,112,0.85)', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1 },
+                title: { display: true, text: 'Broj stolica (24h poslije)' }
+              }
+            }
+          }
+        }));
+      }
+
+      const timeline = buildDailyTimeline(bowel, probiotics, 30);
+      const dailyCanvas = document.getElementById('chart-daily-timeline');
+      if (dailyCanvas) {
+        trendCharts.push(new Chart(dailyCanvas, {
+          type: 'bar',
+          data: {
+            labels: timeline.map(d => d.label),
+            datasets: [
+              {
+                type: 'bar',
+                label: 'Broj stolica',
+                data: timeline.map(d => d.count),
+                backgroundColor: 'rgba(79,121,112,0.35)',
+                borderRadius: 4,
+                yAxisID: 'y'
+              },
+              {
+                type: 'line',
+                label: 'Prosj. tip stolice',
+                data: timeline.map(d => d.avgType),
+                borderColor: '#FF6B8B',
+                backgroundColor: '#FF6B8B',
+                tension: 0.3,
+                spanGaps: true,
+                yAxisID: 'y1'
+              },
+              {
+                type: 'line',
+                label: 'Probiotik unosi',
+                data: timeline.map(d => d.probioticCount),
+                borderColor: '#D4821A',
+                backgroundColor: '#D4821A',
+                stepped: true,
+                yAxisID: 'y'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                position: 'left',
+                title: { display: true, text: 'Broj' }
+              },
+              y1: {
+                min: 1,
+                max: 7,
+                position: 'right',
+                grid: { drawOnChartArea: false },
+                title: { display: true, text: 'Tip' }
+              }
+            }
+          }
+        }));
+      }
+    }
+
     async function loadTrendovi() {
       const container = document.getElementById('trendovi-content');
       container.innerHTML = '<div class="spinner"></div>';
       showError(false);
+      destroyTrendCharts();
 
       try {
         const endDate = new Date();
@@ -2257,186 +2660,62 @@
           fetchProbiotics(startDate, endDate)
         ]);
 
-        const now = new Date();
-        const d7 = new Date(now); d7.setDate(d7.getDate() - 7);
-        const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
-
-        const m7 = measurements.filter(m => new Date(m.measured_at) >= d7);
-        const m30 = measurements.filter(m => new Date(m.measured_at) >= d30);
-
-        const avg = (arr, field) => arr.length ? Math.round(arr.reduce((s, x) => s + x[field], 0) / arr.length) : null;
-
-        const avg7 = { sys: avg(m7, 'systolic'), dia: avg(m7, 'diastolic'), pulse: avg(m7, 'pulse') };
-        const avg30 = { sys: avg(m30, 'systolic'), dia: avg(m30, 'diastolic'), pulse: avg(m30, 'pulse') };
-
-        const morning = measurements.filter(m => new Date(m.measured_at).getHours() < 12);
-        const evening = measurements.filter(m => new Date(m.measured_at).getHours() >= 12);
-        const avgMorning = { sys: avg(morning, 'systolic'), dia: avg(morning, 'diastolic'), pulse: avg(morning, 'pulse') };
-        const avgEvening = { sys: avg(evening, 'systolic'), dia: avg(evening, 'diastolic'), pulse: avg(evening, 'pulse') };
-
-        const trendText = computeTrend(measurements);
-        const interpretation = getInterpretation(avg30);
-
-        const categoryCounts = {};
-        BP_CATEGORIES.forEach(c => categoryCounts[c.key] = 0);
-        measurements.forEach(m => {
-          const cls = classifyBP(m.systolic, m.diastolic);
-          categoryCounts[cls.key] = (categoryCounts[cls.key] || 0) + 1;
-        });
-        const maxCount = Math.max(...Object.values(categoryCounts), 1);
-
-        const b7 = bowel.filter(b => new Date(b.recorded_at) >= d7);
-        const uniqueBowelDays = new Set(b7.map(b => localDateKey(b.recorded_at))).size;
-        const bowelAvgDaily = uniqueBowelDays > 0 ? (b7.length / 7).toFixed(1) : '0';
-
-        const bowelTypeCounts = {};
-        for (let i = 1; i <= 7; i++) bowelTypeCounts[i] = 0;
-        b7.forEach(b => bowelTypeCounts[b.type]++);
-        const maxBowelCount = Math.max(...Object.values(bowelTypeCounts), 1);
-
-        const p7 = probiotics.filter(p => new Date(p.taken_at) >= d7);
-        const probioticTypeCounts = {};
-        PROBIOTIC_TYPES.forEach(t => probioticTypeCounts[t.key] = 0);
-        p7.forEach(p => {
-          (Array.isArray(p.types) ? p.types : []).forEach(t => {
-            if (probioticTypeCounts[t] !== undefined) probioticTypeCounts[t]++;
-          });
-        });
-        const maxProbioticCount = Math.max(...Object.values(probioticTypeCounts), 1);
-        const probioticAvgDaily = (p7.length / 7).toFixed(1);
+        const hasAnyData = measurements.length || bowel.length || probiotics.length;
+        if (!hasAnyData) {
+          container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 7l-8.5 8.5-4-4L2 17"/></svg></div>Nema dovoljno podataka za trendove.<br>Dodajte unose.</div>';
+          return;
+        }
 
         let html = '';
+        html += renderBPPeriodTable(measurements);
+        html += renderBowelPeriodTable(bowel);
 
-        html += renderStatCard('Prosjek zadnjih 7 dana', avg7);
-        html += renderStatCard('Prosjek zadnjih 30 dana', avg30);
+        const analysis = analyzeProbioticBowel(probiotics, bowel);
+        const activeProbiotics = PROBIOTIC_TYPES.filter(t => analysis[t.key].all.doses > 0);
 
-        html += `<div class="stat-card">
-          <h3>Jutarnji vs Večernji prosjek</h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div>
-              <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px">Prije 12:00</div>
-              ${renderMiniStats(avgMorning)}
-            </div>
-            <div>
-              <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px">Poslije 12:00</div>
-              ${renderMiniStats(avgEvening)}
-            </div>
-          </div>
-        </div>`;
-
-        html += `<div class="trend-text">${trendText}</div>`;
-        html += `<div class="interpretation">${interpretation}</div>`;
-
-        html += `<div class="stat-card"><h3>Kategorije pritiska (90 dana)</h3><div class="bar-chart">`;
-        BP_CATEGORIES.forEach(cat => {
-          const count = categoryCounts[cat.key] || 0;
-          const pct = (count / maxCount) * 100;
-          html += `<div class="bar-row">
-            <span class="bar-label">${cat.label}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
-            <span class="bar-count">${count}</span>
+        if (activeProbiotics.length) {
+          html += `<div class="stat-card">
+            <h3>Probiotik → stolica (24h poslije)</h3>
+            <p class="chart-note" style="margin-top:0;margin-bottom:12px">Uporedite jutarnje i večernje uzimanje. Manji Bristol tip i manje stolica mogu značiti da probiotik pomaže.</p>
+            <div class="chart-wrap"><canvas id="chart-probiotic-type"></canvas></div>
+            <div class="chart-wrap" style="margin-top:20px"><canvas id="chart-probiotic-count"></canvas></div>
           </div>`;
-        });
-        html += '</div></div>';
 
-        html += `<div class="stat-card">
-          <h3>Stolica — zadnjih 7 dana</h3>
-          <p style="margin-bottom:12px">Prosjek dnevno: <strong>${bowelAvgDaily}</strong></p>
-          <div class="bar-chart">`;
-        BOWEL_TYPES.forEach(t => {
-          const count = bowelTypeCounts[t.num] || 0;
-          const pct = (count / maxBowelCount) * 100;
-          html += `<div class="bar-row">
-            <span class="bar-label">${t.num}. ${t.label.split(' ')[0]}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${t.color}"></div></div>
-            <span class="bar-count">${count}</span>
+          html += `<div class="stat-card">
+            <h3>Dnevni pregled (30 dana)</h3>
+            <div class="chart-wrap tall"><canvas id="chart-daily-timeline"></canvas></div>
+            <p class="chart-note">Zelene stubičke = broj stolica, roza linija = prosječni tip, narandžasta = probiotik unosi tog dana.</p>
           </div>`;
-        });
-        html += '</div></div>';
 
-        html += `<div class="stat-card">
-          <h3>Probiotik — zadnjih 7 dana</h3>
-          <p style="margin-bottom:12px">Unosa dnevno: <strong>${probioticAvgDaily}</strong> · Ukupno: <strong>${p7.length}</strong></p>
-          <div class="bar-chart">`;
-        PROBIOTIC_TYPES.forEach(t => {
-          const count = probioticTypeCounts[t.key] || 0;
-          const pct = (count / maxProbioticCount) * 100;
-          html += `<div class="bar-row">
-            <span class="bar-label">${t.label}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--accent-mid),var(--accent))"></div></div>
-            <span class="bar-count">${count}</span>
-          </div>`;
-        });
-        html += '</div></div>';
-
-        if (measurements.length === 0) {
-          html = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 7l-8.5 8.5-4-4L2 17"/></svg></div>Nema dovoljno podataka za trendove.<br>Dodajte mjerenja.</div>';
+          html += `<div class="stat-card"><h3>Probiotik — detalji</h3><table class="period-table">
+            <thead><tr><th>Probiotik</th><th>Uzimanja</th><th>Tip 24h (jutro)</th><th>Tip 24h (večer)</th><th>Stolica 24h</th></tr></thead><tbody>`;
+          activeProbiotics.forEach(t => {
+            const a = analysis[t.key];
+            html += `<tr>
+              <td>${t.label}</td>
+              <td><span class="num">${a.all.doses}</span></td>
+              <td>${fmtNum(a.morning.avgType)} <span class="sub">(${a.morning.doses}×)</span></td>
+              <td>${fmtNum(a.evening.avgType)} <span class="sub">(${a.evening.doses}×)</span></td>
+              <td>${fmtNum(a.all.avgCount)}/dan</td>
+            </tr>`;
+          });
+          html += '</tbody></table></div>';
+        } else if (probiotics.length === 0) {
+          html += `<div class="stat-card"><h3>Probiotik analiza</h3>
+            <p class="chart-note">Nema unosa probiotika. Dodajte probiotike da vidite uticaj na stolicu.</p></div>`;
         }
 
         container.innerHTML = html;
+
+        if (activeProbiotics.length) {
+          await loadChartJs();
+          renderProbioticCharts(probiotics, bowel);
+        }
       } catch (e) {
         console.error(e);
         container.innerHTML = '';
         showError(true, formatFetchError(e));
       }
-    }
-
-    function renderStatCard(title, data) {
-      return `<div class="stat-card">
-        <h3>${title}</h3>
-        <div class="stat-values">
-          <div class="stat-item"><div class="stat-num">${data.sys ?? '—'}</div><div class="stat-label">Sistolni</div></div>
-          <div class="stat-item"><div class="stat-num">${data.dia ?? '—'}</div><div class="stat-label">Dijastolni</div></div>
-          <div class="stat-item"><div class="stat-num">${data.pulse ?? '—'}</div><div class="stat-label">Puls</div></div>
-        </div>
-      </div>`;
-    }
-
-    function renderMiniStats(data) {
-      if (!data.sys) return '<span style="color:var(--text-secondary)">Nema podataka</span>';
-      return `<span style="font-weight:700;font-variant-numeric:tabular-nums">${data.sys}/${data.dia}</span> <span style="color:var(--text-secondary)">♥ ${data.pulse}</span>`;
-    }
-
-    function computeTrend(measurements) {
-      const now = new Date();
-      const dailyAvgs = [];
-
-      for (let i = 6; i >= 0; i--) {
-        const day = new Date(now);
-        day.setDate(day.getDate() - i);
-        const key = localDateKey(day);
-        const dayMs = measurements.filter(m => localDateKey(m.measured_at) === key);
-        if (dayMs.length > 0) {
-          dailyAvgs.push(dayMs.reduce((s, m) => s + m.systolic, 0) / dayMs.length);
-        }
-      }
-
-      if (dailyAvgs.length < 2) return '➡ Nema dovoljno podataka za trend';
-
-      const n = dailyAvgs.length;
-      let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-      for (let i = 0; i < n; i++) {
-        sumX += i; sumY += dailyAvgs[i]; sumXY += i * dailyAvgs[i]; sumX2 += i * i;
-      }
-      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-
-      if (slope > 2) return '⬆ Pritisak raste u posljednjih 7 dana';
-      if (slope < -2) return '⬇ Pritisak opada u posljednjih 7 dana';
-      return '➡ Pritisak je stabilan u posljednjih 7 dana';
-    }
-
-    function getInterpretation(avg30) {
-      if (!avg30.sys) return 'Nema dovoljno mjerenja u zadnjih 30 dana za interpretaciju.';
-      const cls = classifyBP(avg30.sys, avg30.dia);
-      const texts = {
-        nisko: `Prosjek zadnjih 30 dana: ${avg30.sys}/${avg30.dia} mmHg. Nastavite redovno praćenje.`,
-        normalno: `Prosjek zadnjih 30 dana: ${avg30.sys}/${avg30.dia} mmHg. Nastavite redovno praćenje.`,
-        'visoko-normalno': `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je na gornjoj granici normale. Pazite na unos soli, stres i fizičku aktivnost.`,
-        poviseno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je povišen. Preporučujemo konzultaciju s liječnikom i praćenje na dnevnoj bazi.`,
-        visoko: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je visok. Obratite se liječniku što prije.`,
-        kriticno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je kritično visok. Odmah potražite medicinsku pomoć.`
-      };
-      return texts[cls.key] || texts['visoko-normalno'];
     }
 
     // Modals
