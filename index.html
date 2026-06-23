@@ -1089,11 +1089,13 @@
     }
 
     .bar-label {
-      width: 120px;
+      width: 148px;
       flex-shrink: 0;
       text-align: right;
       color: var(--text-secondary);
       font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.25;
     }
 
     .bar-track {
@@ -1716,12 +1718,12 @@
     ];
 
     const BP_CATEGORIES = [
-      { key: 'nisko', label: 'Nisko', color: '#5B8DB8' },
-      { key: 'normalno', label: 'Normalno', color: '#3A8A5C' },
-      { key: 'visoko-normalno', label: 'Visoko-normalno', color: '#D4821A' },
-      { key: 'poviseno', label: 'Povišeno', color: '#E07B39' },
-      { key: 'visoko', label: 'Visoko', color: '#C0392B' },
-      { key: 'kriticno', label: 'Kritično', color: '#7B0D0D' }
+      { key: 'low', label: '<80 / <50', color: '#5B8DB8' },
+      { key: 'normal', label: '80–109 / 50–74', color: '#3A8A5C' },
+      { key: 'high-normal', label: '110–124 / 75–79', color: '#D4821A' },
+      { key: 'elevated', label: '125–144 / 80–89', color: '#E07B39' },
+      { key: 'high', label: '145–164 / 90–99', color: '#C0392B' },
+      { key: 'critical', label: '≥165 / ≥100', color: '#7B0D0D' }
     ];
 
     let currentPinHash = null;
@@ -1761,13 +1763,12 @@
     }
 
     function classifyBP(sys, dia) {
-      if (sys >= 180 || dia >= 110) return { label: 'KRITIČNO ⚠️', color: '#7B0D0D', key: 'kriticno', critical: true };
-      if (sys >= 160 || dia >= 100) return { label: 'Visoko', color: '#C0392B', key: 'visoko' };
-      if (sys >= 140 || dia >= 90) return { label: 'Povišeno', color: '#E07B39', key: 'poviseno' };
-      if (sys >= 130 || dia >= 85) return { label: 'Visoko-normalno', color: '#D4821A', key: 'visoko-normalno' };
-      if (sys >= 90 && sys <= 129 && dia >= 60 && dia <= 84) return { label: 'Normalno', color: '#3A8A5C', key: 'normalno' };
-      if (sys < 90 || dia < 60) return { label: 'Nisko', color: '#5B8DB8', key: 'nisko' };
-      return { label: 'Visoko-normalno', color: '#D4821A', key: 'visoko-normalno' };
+      if (sys >= 165 || dia >= 100) return { label: '≥165 / ≥100', color: '#7B0D0D', key: 'critical', critical: true };
+      if (sys >= 145 || dia >= 90) return { label: '145–164 / 90–99', color: '#C0392B', key: 'high' };
+      if (sys >= 125 || dia >= 80) return { label: '125–144 / 80–89', color: '#E07B39', key: 'elevated' };
+      if (sys >= 110 || dia >= 75) return { label: '110–124 / 75–79', color: '#D4821A', key: 'high-normal' };
+      if (sys >= 80 && dia >= 50) return { label: '80–109 / 50–74', color: '#3A8A5C', key: 'normal' };
+      return { label: '<80 / <50', color: '#5B8DB8', key: 'low' };
     }
 
     function getBowelType(num) {
@@ -2394,7 +2395,7 @@
       const stats = {};
       periods.forEach(p => { stats[p] = avgBP(filterInPeriod(measurements, 'measured_at', p)); });
 
-      let body = rows.map(row => {
+      const body = rows.map(row => {
         const cells = periods.map(p => renderPeriodCell(fmtNum(stats[p][row.field]), stats[p].count ? `${stats[p].count} mj.` : null)).join('');
         return `<tr><td>${row.label}</td>${cells}</tr>`;
       }).join('');
@@ -2402,6 +2403,34 @@
       const header = periods.map(p => `<th>${labels[p]}</th>`).join('');
       return `<div class="stat-card"><h3>Pritisak — prosjeci</h3>
         <table class="period-table"><thead><tr><th></th>${header}</tr></thead><tbody>${body}</tbody></table></div>`;
+    }
+
+    function renderBPCategoryChart(measurements) {
+      if (!measurements.length) return '';
+
+      const categoryCounts = {};
+      BP_CATEGORIES.forEach(c => { categoryCounts[c.key] = 0; });
+      measurements.forEach(m => {
+        const cls = classifyBP(m.systolic, m.diastolic);
+        categoryCounts[cls.key] = (categoryCounts[cls.key] || 0) + 1;
+      });
+      const maxCount = Math.max(...Object.values(categoryCounts), 1);
+
+      let bars = BP_CATEGORIES.map(cat => {
+        const count = categoryCounts[cat.key] || 0;
+        const pct = (count / maxCount) * 100;
+        return `<div class="bar-row">
+          <span class="bar-label">${cat.label}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
+          <span class="bar-count">${count}</span>
+        </div>`;
+      }).join('');
+
+      return `<div class="stat-card">
+        <h3>Rasponi pritiska (90 dana)</h3>
+        <p class="chart-note" style="margin-top:0;margin-bottom:12px">Prilagođena skala (~10 mmHg niža od standardne). Format: sistolični / dijastolični (mmHg).</p>
+        <div class="bar-chart">${bars}</div>
+      </div>`;
     }
 
     function renderBowelPeriodTable(bowel) {
@@ -2669,6 +2698,7 @@
         let html = '';
         html += renderBPPeriodTable(measurements);
         html += renderBowelPeriodTable(bowel);
+        html += renderBPCategoryChart(measurements);
 
         const analysis = analyzeProbioticBowel(probiotics, bowel);
         const activeProbiotics = PROBIOTIC_TYPES.filter(t => analysis[t.key].all.doses > 0);
