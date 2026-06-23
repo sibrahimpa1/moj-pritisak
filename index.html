@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2D6A9F">
+  <title>Moj Pritisak</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F5F2;
+      --surface: #FFFFFF;
+      --primary: #2D6A9F;
+      --primary-dark: #1e4f78;
+      --text: #1A1A2E;
+      --text-secondary: #6B7280;
+      --border: #E5E1DC;
+      --shadow: rgba(0,0,0,0.06);
+      --danger: #C0392B;
+      --nav-height: 64px;
+      --fab-bottom: calc(var(--nav-height) + 16px);
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+      line-height: 1.5;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: var(--nav-height);
+    }
+
+    /* PIN Screen */
+    #pin-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .pin-logo {
+      font-size: 3rem;
+      margin-bottom: 8px;
+    }
+
+    .pin-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .pin-subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 320px;
+    }
+
+    .pin-input {
+      font-size: 2rem;
+      letter-spacing: 0.5em;
+      text-align: center;
+      width: 200px;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      margin-bottom: 16px;
+    }
+
+    .pin-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      margin-top: 12px;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+
+    .pin-toggle-label {
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 16px 8px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .header-date {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-align: right;
+      max-width: 55%;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .icon-btn:hover { background: var(--border); }
+
+    /* Views */
+    .view {
+      display: none;
+      padding: 0 16px 100px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .view.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .card-time {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .bp-value {
+      font-variant-numeric: tabular-nums;
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+
+    .bp-unit {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+
+    .pulse {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .card-note {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      padding: 4px 8px;
+    }
+
+    .delete-btn:hover { opacity: 1; }
+
+    /* Bowel cards */
+    .bowel-card {
+      padding: 12px 16px;
+    }
+
+    .bowel-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bowel-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .bowel-label {
+      font-size: 0.9rem;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 20px 0 10px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-secondary);
+    }
+
+    /* Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 12px;
+      height: 100px;
+      margin-bottom: 12px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Error banner */
+    .error-banner {
+      background: #fde8e8;
+      border: 1px solid #f5c6c6;
+      color: var(--danger);
+      padding: 12px 16px;
+      margin: 0 16px 12px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+    }
+
+    /* Critical alert */
+    .critical-banner {
+      background: #7B0D0D;
+      color: white;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* FABs */
+    .fab-container {
+      position: fixed;
+      bottom: var(--fab-bottom);
+      right: max(16px, calc(50% - 240px + 16px));
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+      z-index: 50;
+    }
+
+    .fab {
+      border: none;
+      border-radius: 28px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+
+    .fab:hover { transform: scale(1.05); }
+
+    .fab-primary {
+      background: var(--primary);
+      color: white;
+      padding: 14px 20px;
+      font-size: 15px;
+    }
+
+    .fab-secondary {
+      background: var(--surface);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      padding: 10px 16px;
+      font-size: 14px;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: var(--nav-height);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 40;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 11px;
+      padding: 8px 4px;
+      transition: color 0.2s;
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-icon { font-size: 1.3rem; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal h2 {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      background: var(--bg);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .field-error {
+      color: var(--danger);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+
+    /* Bowel type grid */
+    .bowel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .bowel-type-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 8px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 0.75rem;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .bowel-type-btn.selected {
+      border-color: var(--primary);
+      background: #e8f0f8;
+    }
+
+    .bowel-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .bowel-type-num {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* Historia */
+    .day-group {
+      margin-bottom: 8px;
+    }
+
+    .day-header {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .day-header:hover { background: #fafafa; }
+
+    .day-header-left h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .day-header-stats {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .day-header-avg {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .day-chevron {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      transition: transform 0.2s;
+    }
+
+    .day-group.expanded .day-chevron { transform: rotate(180deg); }
+
+    .day-content {
+      display: none;
+      padding: 8px 0 4px;
+    }
+
+    .day-group.expanded .day-content { display: block; }
+
+    .load-more-btn {
+      width: 100%;
+      margin: 16px 0;
+    }
+
+    .export-btn {
+      width: 100%;
+      margin-bottom: 16px;
+      background: var(--surface);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    /* Trendovi */
+    .stat-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+
+    .stat-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat-values {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-variant-numeric: tabular-nums;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .trend-text {
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px;
+      background: #e8f0f8;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .interpretation {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--surface);
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+    }
+
+    /* Bar charts */
+    .bar-chart { margin: 12px 0; }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+
+    .bar-label {
+      width: 110px;
+      flex-shrink: 0;
+      text-align: right;
+      color: var(--text-secondary);
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 20px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      min-width: 2px;
+    }
+
+    .bar-count {
+      width: 24px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 24px auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- PIN Screen -->
+    <div id="pin-screen">
+      <div class="pin-logo">🩺</div>
+      <div class="pin-title">Moj Pritisak</div>
+      <p class="pin-subtitle" id="pin-message">Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.</p>
+      <input type="password" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="••••">
+      <button class="btn btn-primary" id="pin-submit">Postavi PIN</button>
+      <button class="btn btn-secondary" id="pin-toggle">Već imam PIN</button>
+    </div>
+
+    <!-- Main App (hidden until PIN set) -->
+    <div id="main-app" class="hidden">
+      <div id="error-banner" class="error-banner hidden">
+        <span>Greška pri učitavanju. Provjeri internet vezu.</span>
+        <button class="btn btn-small btn-danger" id="retry-btn">Pokušaj ponovo</button>
+      </div>
+
+      <!-- Danas -->
+      <div id="view-danas" class="view active">
+        <div class="header">
+          <h1>Moj Pritisak</h1>
+          <div class="header-actions">
+            <div class="header-date" id="danas-date"></div>
+            <button class="icon-btn" id="settings-btn" title="Postavke">⚙️</button>
+          </div>
+        </div>
+        <div id="danas-critical" class="critical-banner hidden"></div>
+        <div id="danas-content"></div>
+      </div>
+
+      <!-- Historija -->
+      <div id="view-historija" class="view">
+        <div class="header">
+          <h1>Historija</h1>
+        </div>
+        <button class="btn export-btn" id="export-btn">Izvezi JSON</button>
+        <div id="historija-content"></div>
+      </div>
+
+      <!-- Trendovi -->
+      <div id="view-trendovi" class="view">
+        <div class="header">
+          <h1>Trendovi</h1>
+        </div>
+        <div id="trendovi-content"></div>
+      </div>
+
+      <!-- FABs -->
+      <div class="fab-container" id="fab-container">
+        <button class="fab fab-primary" id="fab-measurement">+ Mjerenje</button>
+        <button class="fab fab-secondary" id="fab-bowel">+ Stolica</button>
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="nav-tab active" data-view="danas">
+          <span class="nav-icon">📊</span>
+          <span>Danas</span>
+        </button>
+        <button class="nav-tab" data-view="historija">
+          <span class="nav-icon">📅</span>
+          <span>Historija</span>
+        </button>
+        <button class="nav-tab" data-view="trendovi">
+          <span class="nav-icon">📈</span>
+          <span>Trendovi</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Add Measurement Modal -->
+  <div class="modal-overlay" id="modal-measurement">
+    <div class="modal">
+      <h2>Novo mjerenje</h2>
+      <form id="form-measurement">
+        <div class="form-group">
+          <label for="m-systolic">Gornji pritisak</label>
+          <input type="number" id="m-systolic" placeholder="120" min="60" max="250" inputmode="numeric">
+          <div class="field-error hidden" id="err-systolic"></div>
+        </div>
+        <div class="form-group">
+          <label for="m-diastolic">Donji pritisak</label>
+          <input type="number" id="m-diastolic" placeholder="80" min="40" max="150" inputmode="numeric">
+          <div class="field-error hidden" id="err-diastolic"></div>
+        </div>
+        <div class="form-group">
+          <label for="m-pulse">Otkucaji srca</label>
+          <input type="number" id="m-pulse" placeholder="72" min="30" max="200" inputmode="numeric">
+          <div class="field-error hidden" id="err-pulse"></div>
+        </div>
+        <div class="form-group">
+          <label for="m-note">Bilješka</label>
+          <input type="text" id="m-note" placeholder="npr. nakon kafe...">
+        </div>
+        <div class="form-group">
+          <label for="m-datetime">Datum i vrijeme</label>
+          <input type="datetime-local" id="m-datetime">
+          <div class="field-error hidden" id="err-datetime"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Sačuvaj mjerenje</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Bowel Modal -->
+  <div class="modal-overlay" id="modal-bowel">
+    <div class="modal">
+      <h2>Nova stolica</h2>
+      <form id="form-bowel">
+        <div class="form-group">
+          <label>Tip stolice</label>
+          <div class="bowel-grid" id="bowel-grid"></div>
+          <div class="field-error hidden" id="err-bowel-type"></div>
+        </div>
+        <div class="form-group">
+          <label for="b-note">Bilješka</label>
+          <input type="text" id="b-note" placeholder="Opcionalno...">
+        </div>
+        <div class="form-group">
+          <label for="b-datetime">Datum i vrijeme</label>
+          <input type="datetime-local" id="b-datetime">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Sačuvaj</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal">
+      <h2>Postavke</h2>
+      <div class="form-group">
+        <label for="old-pin">Stari PIN</label>
+        <input type="password" id="old-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+        <div class="field-error hidden" id="err-old-pin"></div>
+      </div>
+      <div class="form-group">
+        <label for="new-pin">Novi PIN</label>
+        <input type="password" id="new-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+        <div class="field-error hidden" id="err-new-pin"></div>
+      </div>
+      <div class="form-group">
+        <label for="confirm-pin">Potvrdi novi PIN</label>
+        <input type="password" id="confirm-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+        <div class="field-error hidden" id="err-confirm-pin"></div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:16px;">Promjena PIN-a ne prenosi postojeće podatke na novi PIN.</p>
+      <button class="btn btn-primary" id="change-pin-btn" style="width:100%">Promijeni PIN</button>
+      <button class="btn btn-secondary" id="close-settings" style="width:100%;margin-top:8px;">Zatvori</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'SUPABASE_URL_HERE';
+    const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY_HERE';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const PIN_KEY = 'moj_pritisak_pin_hash';
+    const DAYS = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
+    const MONTHS = ['januar', 'februar', 'mart', 'april', 'maj', 'juni', 'juli', 'august', 'septembar', 'oktobar', 'novembar', 'decembar'];
+
+    const BOWEL_TYPES = [
+      { num: 1, label: 'Tvrde grudice', color: '#3D2314' },
+      { num: 2, label: 'Grumuljasto', color: '#5C3A1E' },
+      { num: 3, label: 'Pukotine, tvrdo', color: '#7A4F28' },
+      { num: 4, label: 'Normalno ✓', color: '#9B6B3A' },
+      { num: 5, label: 'Mekše, jasni rubovi', color: '#B8894F' },
+      { num: 6, label: 'Kašasto', color: '#D4A96A' },
+      { num: 7, label: 'Vodenasto (proljev)', color: '#E8C98A' }
+    ];
+
+    const BP_CATEGORIES = [
+      { key: 'nisko', label: 'Nisko', color: '#5B8DB8' },
+      { key: 'normalno', label: 'Normalno', color: '#3A8A5C' },
+      { key: 'visoko-normalno', label: 'Visoko-normalno', color: '#D4821A' },
+      { key: 'poviseno', label: 'Povišeno', color: '#E07B39' },
+      { key: 'visoko', label: 'Visoko', color: '#C0392B' },
+      { key: 'kriticno', label: 'Kritično', color: '#7B0D0D' }
+    ];
+
+    let currentPinHash = null;
+    let currentView = 'danas';
+    let historijaDaysLoaded = 30;
+    let selectedBowelType = null;
+    let isExistingPin = false;
+
+    async function hashPin(pin) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function formatDateLong(date) {
+      const d = new Date(date);
+      return `${DAYS[d.getDay()]}, ${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}.`;
+    }
+
+    function formatTime(date) {
+      return new Date(date).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function toLocalDatetimeValue(date) {
+      const d = new Date(date);
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function localDateKey(date) {
+      const d = new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getTodayStart() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function classifyBP(sys, dia) {
+      if (sys >= 180 || dia >= 110) return { label: 'KRITIČNO ⚠️', color: '#7B0D0D', key: 'kriticno', critical: true };
+      if (sys >= 160 || dia >= 100) return { label: 'Visoko', color: '#C0392B', key: 'visoko' };
+      if (sys >= 140 || dia >= 90) return { label: 'Povišeno', color: '#E07B39', key: 'poviseno' };
+      if (sys >= 130 || dia >= 85) return { label: 'Visoko-normalno', color: '#D4821A', key: 'visoko-normalno' };
+      if (sys >= 90 && sys <= 129 && dia >= 60 && dia <= 84) return { label: 'Normalno', color: '#3A8A5C', key: 'normalno' };
+      if (sys < 90 || dia < 60) return { label: 'Nisko', color: '#5B8DB8', key: 'nisko' };
+      return { label: 'Visoko-normalno', color: '#D4821A', key: 'visoko-normalno' };
+    }
+
+    function getBowelType(num) {
+      return BOWEL_TYPES.find(t => t.num === num) || BOWEL_TYPES[3];
+    }
+
+    function showError(show) {
+      document.getElementById('error-banner').classList.toggle('hidden', !show);
+    }
+
+    function showFieldError(id, msg) {
+      const el = document.getElementById(id);
+      if (msg) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    function clearMeasurementErrors() {
+      ['err-systolic', 'err-diastolic', 'err-pulse', 'err-datetime'].forEach(id => showFieldError(id, null));
+    }
+
+    // PIN Screen
+    function initPinScreen() {
+      const stored = localStorage.getItem(PIN_KEY);
+      if (stored) {
+        currentPinHash = stored;
+        showMainApp();
+        return;
+      }
+      document.getElementById('pin-screen').classList.remove('hidden');
+      document.getElementById('main-app').classList.add('hidden');
+    }
+
+    document.getElementById('pin-toggle').addEventListener('click', () => {
+      isExistingPin = !isExistingPin;
+      const msg = document.getElementById('pin-message');
+      const btn = document.getElementById('pin-submit');
+      const toggle = document.getElementById('pin-toggle');
+      if (isExistingPin) {
+        msg.innerHTML = 'Unesite postojeći PIN za pristup podacima.';
+        btn.textContent = 'Prijavi se';
+        toggle.textContent = 'Postavi novi PIN';
+      } else {
+        msg.innerHTML = 'Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.';
+        btn.textContent = 'Postavi PIN';
+        toggle.textContent = 'Već imam PIN';
+      }
+      document.getElementById('pin-input').value = '';
+    });
+
+    document.getElementById('pin-input').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    document.getElementById('pin-submit').addEventListener('click', async () => {
+      const pin = document.getElementById('pin-input').value;
+      if (pin.length !== 4) {
+        alert('PIN mora imati 4 cifre.');
+        return;
+      }
+      const hash = await hashPin(pin);
+      localStorage.setItem(PIN_KEY, hash);
+      currentPinHash = hash;
+      showMainApp();
+    });
+
+    function showMainApp() {
+      document.getElementById('pin-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('danas-date').textContent = formatDateLong(new Date());
+      loadCurrentView();
+    }
+
+    // Navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const view = tab.dataset.view;
+        switchView(view);
+      });
+    });
+
+    function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const viewEl = document.getElementById(`view-${view}`);
+      viewEl.classList.add('active');
+      requestAnimationFrame(() => viewEl.style.opacity = '1');
+      document.getElementById('fab-container').classList.toggle('hidden', view !== 'danas');
+      loadCurrentView();
+    }
+
+    function loadCurrentView() {
+      if (!currentPinHash) return;
+      if (currentView === 'danas') loadDanas();
+      else if (currentView === 'historija') loadHistorija();
+      else if (currentView === 'trendovi') loadTrendovi();
+    }
+
+    document.getElementById('retry-btn').addEventListener('click', loadCurrentView);
+
+    // Data fetching
+    async function fetchMeasurements(fromDate, toDate) {
+      let query = supabase
+        .from('measurements')
+        .select('*')
+        .eq('pin_hash', currentPinHash)
+        .order('measured_at', { ascending: true });
+      if (fromDate) query = query.gte('measured_at', fromDate.toISOString());
+      if (toDate) query = query.lte('measured_at', toDate.toISOString());
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function fetchBowel(fromDate, toDate) {
+      let query = supabase
+        .from('bowel_movements')
+        .select('*')
+        .eq('pin_hash', currentPinHash)
+        .order('recorded_at', { ascending: true });
+      if (fromDate) query = query.gte('recorded_at', fromDate.toISOString());
+      if (toDate) query = query.lte('recorded_at', toDate.toISOString());
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function fetchAllData() {
+      const [measurements, bowel] = await Promise.all([
+        supabase.from('measurements').select('*').eq('pin_hash', currentPinHash).order('measured_at', { ascending: true }),
+        supabase.from('bowel_movements').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true })
+      ]);
+      if (measurements.error) throw measurements.error;
+      if (bowel.error) throw bowel.error;
+      return { measurements: measurements.data || [], bowel: bowel.data || [] };
+    }
+
+    // Danas view
+    async function loadDanas() {
+      const container = document.getElementById('danas-content');
+      const criticalEl = document.getElementById('danas-critical');
+      container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+      criticalEl.classList.add('hidden');
+      showError(false);
+
+      try {
+        const todayStart = getTodayStart();
+        const tomorrow = new Date(todayStart);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const [measurements, bowel] = await Promise.all([
+          fetchMeasurements(todayStart, tomorrow),
+          fetchBowel(todayStart, tomorrow)
+        ]);
+
+        let html = '';
+        let hasCritical = false;
+
+        if (measurements.length === 0 && bowel.length === 0) {
+          html = '<div class="empty-state">Nema mjerenja za danas. Dodaj prvo mjerenje.</div>';
+        } else {
+          measurements.forEach(m => {
+            const cls = classifyBP(m.systolic, m.diastolic);
+            if (cls.critical) hasCritical = true;
+            html += renderMeasurementCard(m, cls);
+          });
+
+          if (bowel.length > 0) {
+            html += '<div class="section-title">Stolica</div>';
+            bowel.forEach(b => { html += renderBowelCard(b); });
+          }
+        }
+
+        if (hasCritical) {
+          criticalEl.textContent = '⚠️ KRITIČNO — Obratite se liječniku odmah!';
+          criticalEl.classList.remove('hidden');
+        }
+
+        container.innerHTML = html;
+        bindDeleteHandlers();
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '';
+        showError(true);
+      }
+    }
+
+    function renderMeasurementCard(m, cls) {
+      cls = cls || classifyBP(m.systolic, m.diastolic);
+      return `
+        <div class="card" data-id="${m.id}" data-type="measurement">
+          <div class="card-header">
+            <span class="card-time">${formatTime(m.measured_at)}</span>
+            <span class="badge" style="background:${cls.color}">${cls.label}</span>
+          </div>
+          <div class="bp-value">${m.systolic}/${m.diastolic} <span class="bp-unit">mmHg</span></div>
+          <div class="pulse">♥ ${m.pulse} otkucaja/min</div>
+          ${m.note ? `<div class="card-note">${escapeHtml(m.note)}</div>` : ''}
+          <div class="card-actions">
+            <button class="delete-btn" data-id="${m.id}" data-type="measurement" title="Obriši">🗑</button>
+          </div>
+        </div>`;
+    }
+
+    function renderBowelCard(b) {
+      const type = getBowelType(b.type);
+      return `
+        <div class="card bowel-card" data-id="${b.id}" data-type="bowel">
+          <div class="bowel-row">
+            <span class="card-time">${formatTime(b.recorded_at)}</span>
+            <span class="bowel-dot" style="background:${type.color}"></span>
+            <span class="bowel-label">Tip ${b.type}: ${type.label}</span>
+            <button class="delete-btn" data-id="${b.id}" data-type="bowel" title="Obriši" style="margin-left:auto">🗑</button>
+          </div>
+          ${b.note ? `<div class="card-note">${escapeHtml(b.note)}</div>` : ''}
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function bindDeleteHandlers() {
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (!confirm('Jeste li sigurni da želite obrisati ovaj unos?')) return;
+          const id = btn.dataset.id;
+          const type = btn.dataset.type;
+          const table = type === 'measurement' ? 'measurements' : 'bowel_movements';
+          const { error } = await supabase.from(table).delete().eq('id', id).eq('pin_hash', currentPinHash);
+          if (error) { alert('Greška pri brisanju.'); return; }
+          loadCurrentView();
+        });
+      });
+    }
+
+    // Historija view
+    async function loadHistorija() {
+      const container = document.getElementById('historija-content');
+      container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+      showError(false);
+
+      try {
+        const endDate = new Date();
+        endDate.setHours(23, 59, 59, 999);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - historijaDaysLoaded);
+        startDate.setHours(0, 0, 0, 0);
+
+        const [measurements, bowel] = await Promise.all([
+          fetchMeasurements(startDate, endDate),
+          fetchBowel(startDate, endDate)
+        ]);
+
+        const dayMap = {};
+
+        measurements.forEach(m => {
+          const key = localDateKey(m.measured_at);
+          if (!dayMap[key]) dayMap[key] = { date: new Date(m.measured_at), measurements: [], bowel: [] };
+          dayMap[key].measurements.push(m);
+        });
+
+        bowel.forEach(b => {
+          const key = localDateKey(b.recorded_at);
+          if (!dayMap[key]) dayMap[key] = { date: new Date(b.recorded_at), measurements: [], bowel: [] };
+          dayMap[key].bowel.push(b);
+        });
+
+        const sortedDays = Object.keys(dayMap).sort((a, b) => b.localeCompare(a));
+
+        if (sortedDays.length === 0) {
+          container.innerHTML = '<div class="empty-state">Nema podataka za prikaz.</div>';
+          return;
+        }
+
+        let html = '';
+        sortedDays.forEach(key => {
+          const day = dayMap[key];
+          const avgSys = day.measurements.length
+            ? Math.round(day.measurements.reduce((s, m) => s + m.systolic, 0) / day.measurements.length)
+            : '—';
+          const avgDia = day.measurements.length
+            ? Math.round(day.measurements.reduce((s, m) => s + m.diastolic, 0) / day.measurements.length)
+            : '—';
+
+          html += `
+            <div class="day-group" data-day="${key}">
+              <div class="day-header">
+                <div class="day-header-left">
+                  <h3>${formatDateLong(day.date)}</h3>
+                  <div class="day-header-stats">${day.measurements.length} mjerenja · ${day.bowel.length} stolica</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="day-header-avg">${avgSys}/${avgDia}</div>
+                  <span class="day-chevron">▼</span>
+                </div>
+              </div>
+              <div class="day-content">`;
+
+          day.measurements.forEach(m => { html += renderMeasurementCard(m); });
+          day.bowel.forEach(b => { html += renderBowelCard(b); });
+
+          html += '</div></div>';
+        });
+
+        html += '<button class="btn btn-primary load-more-btn" id="load-more-btn">Učitaj starije</button>';
+        container.innerHTML = html;
+
+        document.querySelectorAll('.day-header').forEach(header => {
+          header.addEventListener('click', () => {
+            header.parentElement.classList.toggle('expanded');
+          });
+        });
+
+        document.getElementById('load-more-btn').addEventListener('click', () => {
+          historijaDaysLoaded += 30;
+          loadHistorija();
+        });
+
+        bindDeleteHandlers();
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '';
+        showError(true);
+      }
+    }
+
+    // Export
+    document.getElementById('export-btn').addEventListener('click', async () => {
+      try {
+        const data = await fetchAllData();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `moj-pritisak-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Greška pri izvozu podataka.');
+      }
+    });
+
+    // Trendovi view
+    async function loadTrendovi() {
+      const container = document.getElementById('trendovi-content');
+      container.innerHTML = '<div class="spinner"></div>';
+      showError(false);
+
+      try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 90);
+
+        const [measurements, bowel] = await Promise.all([
+          fetchMeasurements(startDate, endDate),
+          fetchBowel(startDate, endDate)
+        ]);
+
+        const now = new Date();
+        const d7 = new Date(now); d7.setDate(d7.getDate() - 7);
+        const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
+
+        const m7 = measurements.filter(m => new Date(m.measured_at) >= d7);
+        const m30 = measurements.filter(m => new Date(m.measured_at) >= d30);
+
+        const avg = (arr, field) => arr.length ? Math.round(arr.reduce((s, x) => s + x[field], 0) / arr.length) : null;
+
+        const avg7 = { sys: avg(m7, 'systolic'), dia: avg(m7, 'diastolic'), pulse: avg(m7, 'pulse') };
+        const avg30 = { sys: avg(m30, 'systolic'), dia: avg(m30, 'diastolic'), pulse: avg(m30, 'pulse') };
+
+        const morning = measurements.filter(m => new Date(m.measured_at).getHours() < 12);
+        const evening = measurements.filter(m => new Date(m.measured_at).getHours() >= 12);
+        const avgMorning = { sys: avg(morning, 'systolic'), dia: avg(morning, 'diastolic'), pulse: avg(morning, 'pulse') };
+        const avgEvening = { sys: avg(evening, 'systolic'), dia: avg(evening, 'diastolic'), pulse: avg(evening, 'pulse') };
+
+        const trendText = computeTrend(measurements);
+        const interpretation = getInterpretation(avg30);
+
+        const categoryCounts = {};
+        BP_CATEGORIES.forEach(c => categoryCounts[c.key] = 0);
+        measurements.forEach(m => {
+          const cls = classifyBP(m.systolic, m.diastolic);
+          categoryCounts[cls.key] = (categoryCounts[cls.key] || 0) + 1;
+        });
+        const maxCount = Math.max(...Object.values(categoryCounts), 1);
+
+        const b7 = bowel.filter(b => new Date(b.recorded_at) >= d7);
+        const uniqueBowelDays = new Set(b7.map(b => localDateKey(b.recorded_at))).size;
+        const bowelAvgDaily = uniqueBowelDays > 0 ? (b7.length / 7).toFixed(1) : '0';
+
+        const bowelTypeCounts = {};
+        for (let i = 1; i <= 7; i++) bowelTypeCounts[i] = 0;
+        b7.forEach(b => bowelTypeCounts[b.type]++);
+        const maxBowelCount = Math.max(...Object.values(bowelTypeCounts), 1);
+
+        let html = '';
+
+        html += renderStatCard('Prosjek zadnjih 7 dana', avg7);
+        html += renderStatCard('Prosjek zadnjih 30 dana', avg30);
+
+        html += `<div class="stat-card">
+          <h3>Jutarnji vs Večernji prosjek</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px">Prije 12:00</div>
+              ${renderMiniStats(avgMorning)}
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px">Poslije 12:00</div>
+              ${renderMiniStats(avgEvening)}
+            </div>
+          </div>
+        </div>`;
+
+        html += `<div class="trend-text">${trendText}</div>`;
+        html += `<div class="interpretation">${interpretation}</div>`;
+
+        html += `<div class="stat-card"><h3>Kategorije pritiska (90 dana)</h3><div class="bar-chart">`;
+        BP_CATEGORIES.forEach(cat => {
+          const count = categoryCounts[cat.key] || 0;
+          const pct = (count / maxCount) * 100;
+          html += `<div class="bar-row">
+            <span class="bar-label">${cat.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
+            <span class="bar-count">${count}</span>
+          </div>`;
+        });
+        html += '</div></div>';
+
+        html += `<div class="stat-card">
+          <h3>Stolica — zadnjih 7 dana</h3>
+          <p style="margin-bottom:12px">Prosjek dnevno: <strong>${bowelAvgDaily}</strong></p>
+          <div class="bar-chart">`;
+        BOWEL_TYPES.forEach(t => {
+          const count = bowelTypeCounts[t.num] || 0;
+          const pct = (count / maxBowelCount) * 100;
+          html += `<div class="bar-row">
+            <span class="bar-label">${t.num}. ${t.label.split(' ')[0]}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${t.color}"></div></div>
+            <span class="bar-count">${count}</span>
+          </div>`;
+        });
+        html += '</div></div>';
+
+        if (measurements.length === 0) {
+          html = '<div class="empty-state">Nema dovoljno podataka za trendove. Dodajte mjerenja.</div>';
+        }
+
+        container.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '';
+        showError(true);
+      }
+    }
+
+    function renderStatCard(title, data) {
+      return `<div class="stat-card">
+        <h3>${title}</h3>
+        <div class="stat-values">
+          <div class="stat-item"><div class="stat-num">${data.sys ?? '—'}</div><div class="stat-label">Sistolni</div></div>
+          <div class="stat-item"><div class="stat-num">${data.dia ?? '—'}</div><div class="stat-label">Dijastolni</div></div>
+          <div class="stat-item"><div class="stat-num">${data.pulse ?? '—'}</div><div class="stat-label">Puls</div></div>
+        </div>
+      </div>`;
+    }
+
+    function renderMiniStats(data) {
+      if (!data.sys) return '<span style="color:var(--text-secondary)">Nema podataka</span>';
+      return `<span style="font-weight:700;font-variant-numeric:tabular-nums">${data.sys}/${data.dia}</span> <span style="color:var(--text-secondary)">♥ ${data.pulse}</span>`;
+    }
+
+    function computeTrend(measurements) {
+      const now = new Date();
+      const dailyAvgs = [];
+
+      for (let i = 6; i >= 0; i--) {
+        const day = new Date(now);
+        day.setDate(day.getDate() - i);
+        const key = localDateKey(day);
+        const dayMs = measurements.filter(m => localDateKey(m.measured_at) === key);
+        if (dayMs.length > 0) {
+          dailyAvgs.push(dayMs.reduce((s, m) => s + m.systolic, 0) / dayMs.length);
+        }
+      }
+
+      if (dailyAvgs.length < 2) return '➡ Nema dovoljno podataka za trend';
+
+      const n = dailyAvgs.length;
+      let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+      for (let i = 0; i < n; i++) {
+        sumX += i; sumY += dailyAvgs[i]; sumXY += i * dailyAvgs[i]; sumX2 += i * i;
+      }
+      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+      if (slope > 2) return '⬆ Pritisak raste u posljednjih 7 dana';
+      if (slope < -2) return '⬇ Pritisak opada u posljednjih 7 dana';
+      return '➡ Pritisak je stabilan u posljednjih 7 dana';
+    }
+
+    function getInterpretation(avg30) {
+      if (!avg30.sys) return 'Nema dovoljno mjerenja u zadnjih 30 dana za interpretaciju.';
+      const cls = classifyBP(avg30.sys, avg30.dia);
+      const texts = {
+        nisko: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je ispod normalnog raspona. Razgovarajte s liječnikom ako se osjećate vrtoglavim ili umornim.`,
+        normalno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je u normalnom rasponu. Nastavite s redovnim praćenjem i zdravim navikama.`,
+        'visoko-normalno': `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je na gornjoj granici normale. Pazite na unos soli, stres i fizičku aktivnost.`,
+        poviseno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je povišen. Preporučujemo konzultaciju s liječnikom i praćenje na dnevnoj bazi.`,
+        visoko: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je visok. Obratite se liječniku što prije.`,
+        kriticno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je kritično visok. Odmah potražite medicinsku pomoć.`
+      };
+      return texts[cls.key] || texts['visoko-normalno'];
+    }
+
+    // Modals
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal(overlay.id);
+      });
+    });
+
+    document.getElementById('fab-measurement').addEventListener('click', () => {
+      clearMeasurementErrors();
+      document.getElementById('m-systolic').value = '';
+      document.getElementById('m-diastolic').value = '';
+      document.getElementById('m-pulse').value = '';
+      document.getElementById('m-note').value = '';
+      document.getElementById('m-datetime').value = toLocalDatetimeValue(new Date());
+      openModal('modal-measurement');
+    });
+
+    document.getElementById('fab-bowel').addEventListener('click', () => {
+      selectedBowelType = null;
+      showFieldError('err-bowel-type', null);
+      document.getElementById('b-note').value = '';
+      document.getElementById('b-datetime').value = toLocalDatetimeValue(new Date());
+      renderBowelGrid();
+      openModal('modal-bowel');
+    });
+
+    function renderBowelGrid() {
+      const grid = document.getElementById('bowel-grid');
+      grid.innerHTML = BOWEL_TYPES.map(t => `
+        <button type="button" class="bowel-type-btn ${selectedBowelType === t.num ? 'selected' : ''}" data-type="${t.num}">
+          <span class="bowel-type-num">${t.num}</span>
+          <span class="bowel-swatch" style="background:${t.color}"></span>
+          <span>${t.label}</span>
+        </button>
+      `).join('');
+
+      grid.querySelectorAll('.bowel-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedBowelType = parseInt(btn.dataset.type);
+          renderBowelGrid();
+        });
+      });
+    }
+
+    document.getElementById('form-measurement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMeasurementErrors();
+      let valid = true;
+
+      const sys = parseInt(document.getElementById('m-systolic').value);
+      const dia = parseInt(document.getElementById('m-diastolic').value);
+      const pulse = parseInt(document.getElementById('m-pulse').value);
+      const note = document.getElementById('m-note').value.trim();
+      const dt = document.getElementById('m-datetime').value;
+
+      if (isNaN(sys) || sys < 60 || sys > 250) {
+        showFieldError('err-systolic', 'Unesite vrijednost između 60 i 250.');
+        valid = false;
+      }
+      if (isNaN(dia) || dia < 40 || dia > 150) {
+        showFieldError('err-diastolic', 'Unesite vrijednost između 40 i 150.');
+        valid = false;
+      }
+      if (isNaN(pulse) || pulse < 30 || pulse > 200) {
+        showFieldError('err-pulse', 'Unesite vrijednost između 30 i 200.');
+        valid = false;
+      }
+      if (!dt) {
+        showFieldError('err-datetime', 'Odaberite datum i vrijeme.');
+        valid = false;
+      }
+      if (!valid) return;
+
+      const { error } = await supabase.from('measurements').insert({
+        measured_at: new Date(dt).toISOString(),
+        systolic: sys,
+        diastolic: dia,
+        pulse,
+        note: note || null,
+        pin_hash: currentPinHash
+      });
+
+      if (error) { alert('Greška pri spremanju.'); return; }
+      closeModal('modal-measurement');
+      if (currentView === 'danas') loadDanas();
+      else switchView('danas');
+    });
+
+    document.getElementById('form-bowel').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedBowelType) {
+        showFieldError('err-bowel-type', 'Odaberite tip stolice.');
+        return;
+      }
+      showFieldError('err-bowel-type', null);
+
+      const note = document.getElementById('b-note').value.trim();
+      const dt = document.getElementById('b-datetime').value;
+
+      const { error } = await supabase.from('bowel_movements').insert({
+        recorded_at: new Date(dt).toISOString(),
+        type: selectedBowelType,
+        note: note || null,
+        pin_hash: currentPinHash
+      });
+
+      if (error) { alert('Greška pri spremanju.'); return; }
+      closeModal('modal-bowel');
+      if (currentView === 'danas') loadDanas();
+      else switchView('danas');
+    });
+
+    // Settings
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      document.getElementById('old-pin').value = '';
+      document.getElementById('new-pin').value = '';
+      document.getElementById('confirm-pin').value = '';
+      ['err-old-pin', 'err-new-pin', 'err-confirm-pin'].forEach(id => showFieldError(id, null));
+      openModal('modal-settings');
+    });
+
+    document.getElementById('close-settings').addEventListener('click', () => closeModal('modal-settings'));
+
+    document.getElementById('change-pin-btn').addEventListener('click', async () => {
+      ['err-old-pin', 'err-new-pin', 'err-confirm-pin'].forEach(id => showFieldError(id, null));
+
+      const oldPin = document.getElementById('old-pin').value;
+      const newPin = document.getElementById('new-pin').value;
+      const confirmPin = document.getElementById('confirm-pin').value;
+
+      const oldHash = await hashPin(oldPin);
+      if (oldHash !== currentPinHash) {
+        showFieldError('err-old-pin', 'Stari PIN nije ispravan.');
+        return;
+      }
+      if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+        showFieldError('err-new-pin', 'Novi PIN mora imati 4 cifre.');
+        return;
+      }
+      if (newPin !== confirmPin) {
+        showFieldError('err-confirm-pin', 'PIN-ovi se ne poklapaju.');
+        return;
+      }
+
+      const newHash = await hashPin(newPin);
+      localStorage.setItem(PIN_KEY, newHash);
+      currentPinHash = newHash;
+      closeModal('modal-settings');
+      alert('PIN je promijenjen. Napomena: podaci ostaju vezani za stari PIN u bazi.');
+      loadCurrentView();
+    });
+
+    ['old-pin', 'new-pin', 'confirm-pin'].forEach(id => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      });
+    });
+
+    // Init
+    initPinScreen();
+    renderBowelGrid();
+  </script>
+</body>
+</html>
