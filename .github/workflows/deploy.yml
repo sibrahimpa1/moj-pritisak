@@ -26,6 +26,18 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Inject Supabase config
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Add SUPABASE_URL and SUPABASE_ANON_KEY as repository secrets."
+            exit 1
+          fi
+          sed -i "s|SUPABASE_URL_HERE|${SUPABASE_URL}|g" index.html
+          sed -i "s|SUPABASE_ANON_KEY_HERE|${SUPABASE_ANON_KEY}|g" index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

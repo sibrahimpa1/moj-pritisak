@@ -29,22 +29,18 @@ Jednostavna web aplikacija za praćenje krvnog pritiska i stolice — na bosansk
 2. Otvorite **SQL Editor** i pokrenite sadržaj fajla `supabase_setup.sql`
 3. Kopirajte **Project URL** i **anon public key** iz **Settings → API**
 
-### 3. Konfiguracija aplikacije
+### 3. Konfiguracija aplikacije (GitHub Secrets)
 
-U `index.html` zamijenite placeholder vrijednosti:
+Vrijednosti **ne idu u git** — dodajte ih kao tajne u GitHub repozitoriju:
 
-```javascript
-const SUPABASE_URL = 'SUPABASE_URL_HERE';
-const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY_HERE';
-```
+1. GitHub repo → **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret**:
+   - `SUPABASE_URL` — npr. `https://abcdefgh.supabase.co`
+   - `SUPABASE_ANON_KEY` — anon public ključ iz Supabase
 
-Zatim:
+Pri svakom deployu, GitHub Actions automatski ubacuje ove vrijednosti u `index.html`.
 
-```bash
-git add index.html
-git commit -m "Dodaj Supabase konfiguraciju"
-git push
-```
+**Gdje naći Project URL u Supabase:** Dashboard → **Project Settings** (⚙️) → **API** → polje **Project URL** (na vrhu stranice).
 
 ### 4. Korištenje
 
