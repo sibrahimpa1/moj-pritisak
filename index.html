@@ -3,43 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#2D6A9F">
+  <meta name="theme-color" content="#4F7970">
   <title>Moj Pritisak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="config.local.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #F7F5F2;
+      --bg: #F8F9FA;
       --surface: #FFFFFF;
-      --primary: #2D6A9F;
-      --primary-dark: #1e4f78;
-      --text: #1A1A2E;
+      --primary: #4F7970;
+      --primary-dark: #3D6159;
+      --primary-light: #E8F0EE;
+      --accent: #FF6B8B;
+      --accent-soft: #FFE8EE;
+      --accent-mid: #FF8FA8;
+      --accent-dark: #E5527A;
+      --text: #1F2937;
       --text-secondary: #6B7280;
-      --border: #E5E1DC;
-      --shadow: rgba(0,0,0,0.06);
-      --danger: #C0392B;
-      --nav-height: 64px;
-      --fab-bottom: calc(var(--nav-height) + 16px);
+      --text-muted: #9CA3AF;
+      --border: #E5E7EB;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.1);
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 24px;
+      --radius-pill: 999px;
+      --danger: #DC2626;
+      --nav-height: 72px;
+      --sidebar-width: 280px;
+      --fab-bottom: calc(var(--nav-height) + 20px);
     }
 
     html { height: 100%; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 16px;
       background: var(--bg);
       color: var(--text);
       min-height: 100%;
       line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
     #app {
-      max-width: 480px;
-      margin: 0 auto;
       min-height: 100vh;
       position: relative;
-      padding-bottom: var(--nav-height);
     }
 
     /* PIN Screen */
@@ -53,85 +67,158 @@
       text-align: center;
     }
 
-    .pin-logo {
-      font-size: 3rem;
-      margin-bottom: 8px;
+    .pin-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 100%;
+      border: 1px solid var(--border);
     }
 
-    .pin-title {
-      font-size: 1.5rem;
-      font-weight: 700;
+    .pin-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-soft) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--primary);
-      margin-bottom: 4px;
+      box-shadow: 0 4px 16px rgba(255, 107, 139, 0.15);
+    }
+
+    .pin-logo svg { width: 32px; height: 32px; }
+
+    .pin-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
     }
 
     .pin-subtitle {
       color: var(--text-secondary);
-      margin-bottom: 32px;
-      max-width: 320px;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+      line-height: 1.6;
     }
 
     .pin-input {
       font-size: 2rem;
-      letter-spacing: 0.5em;
+      letter-spacing: 0.45em;
       text-align: center;
-      width: 200px;
-      padding: 12px;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      margin-bottom: 16px;
+      width: 100%;
+      max-width: 200px;
+      padding: 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      margin: 0 auto 20px;
+      display: block;
+      font-weight: 600;
+      color: var(--text);
     }
 
     .pin-input:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 121, 112, 0.15);
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 24px;
+      gap: 8px;
+      padding: 14px 28px;
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
     }
 
+    .btn:active:not(:disabled) { transform: scale(0.98); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .btn-primary {
       background: var(--primary);
       color: white;
-      width: 100%;
-      max-width: 280px;
+      box-shadow: 0 4px 14px rgba(79, 121, 112, 0.25);
     }
 
-    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+      box-shadow: 0 6px 18px rgba(79, 121, 112, 0.3);
+    }
+
+    .btn-block { width: 100%; }
+
+    .btn-accent {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border: 1.5px solid var(--accent-mid);
+    }
+
+    .btn-accent:hover:not(:disabled) {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
 
     .btn-secondary {
       background: transparent;
       color: var(--primary);
       margin-top: 12px;
+      width: 100%;
     }
+
+    .btn-secondary:hover:not(:disabled) { background: var(--primary-light); }
+
+    .btn-outline {
+      background: var(--surface);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+
+    .btn-outline:hover:not(:disabled) { background: var(--primary-light); }
 
     .btn-danger {
       background: var(--danger);
       color: white;
+      border-radius: var(--radius-pill);
     }
 
     .btn-small {
-      padding: 6px 12px;
-      font-size: 14px;
+      padding: 0 18px;
+      font-size: 13px;
+      height: 40px;
+      min-height: 40px;
     }
 
-    .pin-toggle-label {
-      margin-top: 24px;
-      font-size: 14px;
-      color: var(--text-secondary);
+    /* App shell — desktop sidebar + mobile bottom nav */
+    #main-app {
+      display: flex;
+      min-height: 100vh;
+      padding-bottom: var(--nav-height);
+    }
+
+    .app-sidebar {
+      display: none;
+    }
+
+    .app-main {
+      flex: 1;
+      min-width: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     /* Header */
@@ -139,47 +226,82 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 16px 8px;
+      padding: 20px 20px 12px;
       position: sticky;
       top: 0;
-      background: var(--bg);
+      background: rgba(248, 249, 250, 0.92);
+      backdrop-filter: blur(12px);
       z-index: 10;
+      gap: 20px;
     }
 
-    .header h1 {
-      font-size: 1.25rem;
+    .header-left {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .header-left h1 {
+      font-size: 1.5rem;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
     }
 
-    .header-date {
-      font-size: 0.8rem;
+    .header-greeting {
+      font-size: 0.85rem;
       color: var(--text-secondary);
-      text-align: right;
-      max-width: 55%;
+      margin-top: 2px;
+      font-weight: 500;
     }
 
     .header-actions {
       display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .header-quick-actions {
+      display: none;
       gap: 8px;
       align-items: center;
+      flex-wrap: nowrap;
+    }
+
+    .header-quick-actions .btn {
+      white-space: nowrap;
+      flex-shrink: 0;
+      width: auto;
     }
 
     .icon-btn {
-      background: none;
-      border: none;
-      font-size: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 1.1rem;
       cursor: pointer;
-      padding: 4px;
-      border-radius: 8px;
+      padding: 0;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
     }
 
-    .icon-btn:hover { background: var(--border); }
+    .icon-btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent-mid);
+    }
 
     /* Views */
     .view {
       display: none;
-      padding: 0 16px 100px;
+      padding: 0 20px 120px;
       opacity: 0;
       transition: opacity 0.25s ease;
     }
@@ -189,130 +311,183 @@
       opacity: 1;
     }
 
+    .content-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    #trendovi-content {
+      display: grid;
+      gap: 16px;
+    }
+
+    #trendovi-content .trend-text,
+    #trendovi-content .interpretation,
+    #trendovi-content .empty-state,
+    #trendovi-content .spinner {
+      grid-column: 1 / -1;
+    }
+
+    .day-content .content-grid {
+      margin-top: 8px;
+    }
+
     /* Cards */
     .card {
       background: var(--surface);
-      border-radius: 12px;
-      box-shadow: 0 2px 8px var(--shadow);
-      padding: 16px;
-      margin-bottom: 12px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
       border: 1px solid var(--border);
+      transition: box-shadow 0.2s;
     }
+
+    .card:hover { box-shadow: var(--shadow-md); }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      gap: 12px;
     }
 
     .card-time {
-      font-weight: 700;
-      font-size: 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
     }
 
     .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
       font-weight: 600;
       color: white;
       white-space: nowrap;
+      letter-spacing: 0.01em;
     }
 
     .bp-value {
       font-variant-numeric: tabular-nums;
-      font-size: 2rem;
+      font-size: 2.25rem;
       font-weight: 700;
-      margin: 4px 0;
+      margin: 4px 0 8px;
+      color: var(--text);
+      letter-spacing: -0.03em;
     }
 
     .bp-unit {
       font-size: 1rem;
-      font-weight: 400;
-      color: var(--text-secondary);
+      font-weight: 500;
+      color: var(--text-muted);
     }
 
     .pulse {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       color: var(--text-secondary);
-      font-size: 0.95rem;
-      margin-bottom: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      background: var(--bg);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
     }
+
+    .pulse-icon { color: var(--accent); }
 
     .card-note {
       font-size: 0.85rem;
       color: var(--text-secondary);
-      margin-top: 8px;
-      font-style: italic;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      line-height: 1.5;
     }
 
     .card-actions {
       display: flex;
       justify-content: flex-end;
-      margin-top: 8px;
+      margin-top: 12px;
     }
 
     .delete-btn {
-      background: none;
+      background: var(--bg);
       border: none;
-      font-size: 1.1rem;
+      font-size: 1rem;
       cursor: pointer;
-      opacity: 0.6;
-      padding: 4px 8px;
+      opacity: 0.7;
+      padding: 8px 12px;
+      border-radius: var(--radius-pill);
+      transition: opacity 0.2s, background 0.2s;
     }
 
-    .delete-btn:hover { opacity: 1; }
-
-    /* Bowel cards */
-    .bowel-card {
-      padding: 12px 16px;
+    .delete-btn:hover {
+      opacity: 1;
+      background: var(--accent-soft);
     }
+
+    .bowel-card { padding: 16px 20px; }
 
     .bowel-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .bowel-dot {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       flex-shrink: 0;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
     }
 
     .bowel-label {
       font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
     }
 
     .section-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 20px 0 10px;
+      letter-spacing: 0.08em;
+      margin: 28px 0 12px;
     }
 
-    /* Empty state */
     .empty-state {
       text-align: center;
-      padding: 48px 24px;
+      padding: 64px 32px;
       color: var(--text-secondary);
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border);
     }
 
-    /* Skeleton */
+    .empty-state-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-soft) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
     .skeleton {
-      background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+      background: linear-gradient(90deg, #eef0f2 25%, #f8f9fa 50%, #eef0f2 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
-      border-radius: 12px;
-      height: 100px;
-      margin-bottom: 12px;
+      border-radius: var(--radius-md);
+      height: 120px;
     }
 
     @keyframes shimmer {
@@ -320,37 +495,37 @@
       100% { background-position: -200% 0; }
     }
 
-    /* Error banner */
     .error-banner {
-      background: #fde8e8;
-      border: 1px solid #f5c6c6;
-      color: var(--danger);
-      padding: 12px 16px;
-      margin: 0 16px 12px;
-      border-radius: 10px;
+      background: var(--accent-soft);
+      border: 1px solid #FFC9D6;
+      color: #B4234A;
+      padding: 14px 18px;
+      margin: 0 20px 16px;
+      border-radius: var(--radius-sm);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       font-size: 0.9rem;
+      font-weight: 500;
     }
 
-    /* Critical alert */
     .critical-banner {
-      background: #7B0D0D;
+      background: linear-gradient(135deg, #7B0D0D, #9B1C1C);
       color: white;
-      padding: 12px 16px;
-      margin-bottom: 12px;
-      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 0 20px 16px;
+      border-radius: var(--radius-sm);
       font-weight: 600;
       text-align: center;
+      box-shadow: var(--shadow-md);
     }
 
-    /* FABs */
+    /* FABs — mobile */
     .fab-container {
       position: fixed;
       bottom: var(--fab-bottom);
-      right: max(16px, calc(50% - 240px + 16px));
+      right: 20px;
       display: flex;
       flex-direction: column-reverse;
       gap: 10px;
@@ -359,45 +534,65 @@
 
     .fab {
       border: none;
-      border-radius: 28px;
+      border-radius: var(--radius-pill);
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: transform 0.2s;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
     }
 
-    .fab:hover { transform: scale(1.05); }
+    .fab:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
 
     .fab-primary {
       background: var(--primary);
       color: white;
-      padding: 14px 20px;
+      padding: 14px 22px;
       font-size: 15px;
     }
 
     .fab-secondary {
       background: var(--surface);
       color: var(--primary);
-      border: 2px solid var(--primary);
-      padding: 10px 16px;
+      border: 1.5px solid var(--primary);
+      padding: 12px 18px;
       font-size: 14px;
     }
 
-    /* Bottom nav */
-    .bottom-nav {
+    .fab-tertiary {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border: 1.5px solid var(--accent-mid);
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+
+    .fab-tertiary:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* Navigation */
+    .app-nav {
       position: fixed;
       bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
+      left: 0;
+      right: 0;
       height: var(--nav-height);
       background: var(--surface);
       border-top: 1px solid var(--border);
       display: flex;
       z-index: 40;
       padding-bottom: env(safe-area-inset-bottom);
+      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
     }
+
+    .nav-brand { display: none; }
 
     .nav-tab {
       flex: 1;
@@ -405,13 +600,15 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 4px;
       background: none;
       border: none;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       font-size: 11px;
-      padding: 8px 4px;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 10px 4px;
       transition: color 0.2s;
     }
 
@@ -420,18 +617,53 @@
       font-weight: 600;
     }
 
-    .nav-icon { font-size: 1.3rem; }
+    .nav-tab.active .nav-icon {
+      position: relative;
+    }
 
-    /* Modal */
+    .nav-tab.active .nav-icon::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-tab.active .nav-icon svg { stroke-width: 2.25; }
+
+    /* Modals */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(4px);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(6px);
       z-index: 100;
       display: none;
       align-items: flex-end;
       justify-content: center;
+      padding: 0;
     }
 
     .modal-overlay.open { display: flex; }
@@ -439,270 +671,349 @@
     .modal {
       background: var(--surface);
       width: 100%;
-      max-width: 480px;
-      border-radius: 20px 20px 0 0;
-      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      max-width: 520px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
       transform: translateY(100%);
-      transition: transform 0.3s ease;
-      max-height: 90vh;
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 92vh;
       overflow-y: auto;
+      box-shadow: var(--shadow-lg);
     }
 
     .modal-overlay.open .modal { transform: translateY(0); }
 
     .modal h2 {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-      color: var(--primary);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+      letter-spacing: -0.02em;
     }
 
-    .form-group {
-      margin-bottom: 16px;
-    }
+    .form-group { margin-bottom: 18px; }
 
     .form-group label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .form-group input,
     .form-group textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       font-size: 16px;
+      font-family: inherit;
       background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .form-group input:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 121, 112, 0.12);
+      background: var(--surface);
     }
 
     .field-error {
-      color: var(--danger);
+      color: var(--accent);
       font-size: 0.8rem;
-      margin-top: 4px;
+      margin-top: 6px;
+      font-weight: 500;
     }
 
-    /* Bowel type grid */
     .bowel-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 10px;
     }
 
     .bowel-type-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      padding: 10px 8px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
+      gap: 6px;
+      padding: 14px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       background: var(--bg);
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 500;
       text-align: center;
-      transition: border-color 0.2s, background 0.2s;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
     }
+
+    .bowel-type-btn:hover { border-color: var(--primary); }
 
     .bowel-type-btn.selected {
       border-color: var(--primary);
-      background: #e8f0f8;
+      background: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(79, 121, 112, 0.12);
     }
 
     .bowel-swatch {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      border: 1px solid rgba(0,0,0,0.1);
+      border: 2px solid rgba(255,255,255,0.8);
+      box-shadow: var(--shadow-sm);
     }
 
     .bowel-type-num {
       font-weight: 700;
       font-size: 1rem;
+      color: var(--primary);
+    }
+
+    /* Probiotics */
+    .probiotic-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .probiotic-type-btn {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+
+    .probiotic-type-btn:hover { border-color: var(--primary); }
+
+    .probiotic-type-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-weight: 600;
+      box-shadow: 0 0 0 3px rgba(255, 107, 139, 0.15);
+    }
+
+    .probiotic-card { padding: 16px 20px; }
+
+    .probiotic-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .probiotic-chip {
+      display: inline-block;
+      padding: 5px 12px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 107, 139, 0.2);
+    }
+
+    .probiotic-icon {
+      color: var(--accent);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .section-title-accent {
+      color: var(--accent-dark);
     }
 
     /* Historia */
-    .day-group {
-      margin-bottom: 8px;
-    }
+    .day-group { margin-bottom: 10px; }
 
     .day-header {
       background: var(--surface);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
       cursor: pointer;
       border: 1px solid var(--border);
-      box-shadow: 0 1px 4px var(--shadow);
+      box-shadow: var(--shadow-sm);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
 
-    .day-header:hover { background: #fafafa; }
+    .day-header:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(79, 121, 112, 0.25);
+    }
 
     .day-header-left h3 {
       font-size: 0.95rem;
       font-weight: 600;
+      color: var(--text);
     }
 
     .day-header-stats {
       font-size: 0.8rem;
       color: var(--text-secondary);
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
     .day-header-avg {
       font-variant-numeric: tabular-nums;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       color: var(--primary);
     }
 
     .day-chevron {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      transition: transform 0.2s;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.25s;
     }
 
     .day-group.expanded .day-chevron { transform: rotate(180deg); }
 
     .day-content {
       display: none;
-      padding: 8px 0 4px;
+      padding: 12px 0 4px;
     }
 
     .day-group.expanded .day-content { display: block; }
 
-    .load-more-btn {
-      width: 100%;
-      margin: 16px 0;
-    }
+    .load-more-btn { width: 100%; margin: 20px 0; }
 
     .export-btn {
-      width: 100%;
-      margin-bottom: 16px;
+      width: calc(100% - 40px);
+      margin: 0 20px 20px;
       background: var(--surface);
       color: var(--primary);
-      border: 2px solid var(--primary);
+      border: 1.5px solid var(--primary);
     }
 
     /* Trendovi */
     .stat-card {
       background: var(--surface);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
+      border-radius: var(--radius-md);
+      padding: 22px;
+      margin-bottom: 16px;
       border: 1px solid var(--border);
-      box-shadow: 0 1px 4px var(--shadow);
+      box-shadow: var(--shadow-sm);
     }
 
     .stat-card h3 {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      margin-bottom: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 16px;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.06em;
     }
 
     .stat-values {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
     }
 
-    .stat-item {
-      text-align: center;
-    }
+    .stat-item { text-align: center; min-width: 72px; }
 
     .stat-num {
       font-variant-numeric: tabular-nums;
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 700;
       color: var(--primary);
+      letter-spacing: -0.02em;
     }
 
     .stat-label {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-secondary);
+      font-weight: 500;
+      margin-top: 4px;
     }
 
     .trend-text {
       font-size: 1rem;
       font-weight: 600;
-      padding: 12px;
-      background: #e8f0f8;
-      border-radius: 10px;
-      margin-bottom: 12px;
+      padding: 16px 20px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
       text-align: center;
     }
 
     .interpretation {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.7;
       margin-bottom: 16px;
-      padding: 12px;
+      padding: 18px 20px;
       background: var(--surface);
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       border-left: 4px solid var(--primary);
+      box-shadow: var(--shadow-sm);
     }
 
-    /* Bar charts */
-    .bar-chart { margin: 12px 0; }
+    .bar-chart { margin: 16px 0; }
 
     .bar-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      font-size: 0.8rem;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.78rem;
     }
 
     .bar-label {
-      width: 110px;
+      width: 120px;
       flex-shrink: 0;
       text-align: right;
       color: var(--text-secondary);
+      font-weight: 500;
     }
 
     .bar-track {
       flex: 1;
-      height: 20px;
+      height: 22px;
       background: var(--bg);
-      border-radius: 4px;
+      border-radius: var(--radius-pill);
       overflow: hidden;
     }
 
     .bar-fill {
       height: 100%;
-      border-radius: 4px;
-      transition: width 0.5s ease;
-      min-width: 2px;
+      border-radius: var(--radius-pill);
+      transition: width 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+      min-width: 4px;
     }
 
     .bar-count {
-      width: 24px;
-      font-weight: 600;
+      width: 28px;
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
+      color: var(--text);
     }
 
-    /* Spinner */
     .spinner {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border: 3px solid var(--border);
       border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 24px auto;
+      margin: 32px auto;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -710,12 +1021,190 @@
     .hidden { display: none !important; }
 
     .dev-banner {
-      background: #FFF3CD;
-      color: #856404;
-      border-bottom: 1px solid #FFE69C;
-      padding: 8px 16px;
+      background: #FEF9C3;
+      color: #854D0E;
+      border-bottom: 1px solid #FDE047;
+      padding: 10px 20px;
       font-size: 0.8rem;
       text-align: center;
+      font-weight: 500;
+    }
+
+    /* ── Desktop layout ── */
+    @media (min-width: 900px) {
+      #main-app {
+        padding-bottom: 0;
+      }
+
+      .nav-tab.active .nav-icon::after { display: none; }
+
+      .app-sidebar {
+        display: block;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: var(--sidebar-width);
+        padding: 28px 16px 0;
+        z-index: 30;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+      }
+
+      .app-nav {
+        position: fixed;
+        left: 0;
+        top: 108px;
+        width: var(--sidebar-width);
+        flex-direction: column;
+        height: auto;
+        border: none;
+        box-shadow: none;
+        padding: 0 16px;
+        gap: 4px;
+        background: transparent;
+      }
+
+      .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 12px 28px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+      }
+
+      .sidebar-brand-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-soft) 100%);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        box-shadow: 0 2px 8px rgba(255, 107, 139, 0.12);
+      }
+
+      .sidebar-brand-icon svg { width: 24px; height: 24px; }
+
+      .sidebar-brand-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      #main-app::before {
+        content: '';
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: var(--sidebar-width);
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        z-index: 20;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .app-nav {
+        z-index: 31;
+      }
+
+      .app-sidebar {
+        z-index: 31;
+      }
+
+      .nav-tab {
+        flex: none;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        width: 100%;
+      }
+
+      .nav-tab:hover { background: var(--bg); }
+
+      .nav-tab.active {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        box-shadow: inset 3px 0 0 var(--accent);
+      }
+
+      .app-main {
+        margin-left: var(--sidebar-width);
+        max-width: none;
+        padding: 0 32px 48px;
+      }
+
+      .view { padding: 0 0 48px; }
+
+      .header {
+        padding: 32px 0 24px;
+        position: static;
+        background: transparent;
+        align-items: center;
+      }
+
+      .header-left h1 { font-size: 1.75rem; }
+
+      .header-quick-actions {
+        display: flex;
+        align-items: center;
+      }
+
+      .fab-container { display: none; }
+
+      .error-banner,
+      .critical-banner { margin: 0 0 20px; }
+
+      .export-btn {
+        width: auto;
+        margin: 0 0 24px;
+      }
+
+      .content-grid {
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      }
+
+      .bowel-grid { grid-template-columns: repeat(3, 1fr); }
+
+      .modal-overlay {
+        align-items: center;
+        padding: 24px;
+      }
+
+      .modal {
+        border-radius: var(--radius-lg);
+        transform: translateY(24px) scale(0.97);
+        opacity: 0;
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s;
+      }
+
+      .modal-overlay.open .modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      #trendovi-content {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bar-label { width: 140px; }
+    }
+
+    @media (min-width: 1200px) {
+      .app-main {
+        padding: 0 48px 48px;
+      }
+
+      .content-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
@@ -724,18 +1213,47 @@
   <div id="app">
     <!-- PIN Screen -->
     <div id="pin-screen">
-      <div class="pin-logo">🩺</div>
-      <div class="pin-title">Moj Pritisak</div>
-      <p class="pin-subtitle" id="pin-message">Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.</p>
-      <form id="pin-form">
-        <input type="tel" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="••••">
-        <button type="submit" class="btn btn-primary" id="pin-submit">Postavi PIN</button>
-      </form>
-      <button class="btn btn-secondary" id="pin-toggle">Već imam PIN</button>
+      <div class="pin-card">
+        <div class="pin-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="pin-title">Moj Pritisak</div>
+        <p class="pin-subtitle" id="pin-message">Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.</p>
+        <form id="pin-form">
+          <input type="tel" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="••••">
+          <button type="submit" class="btn btn-primary btn-block" id="pin-submit">Postavi PIN</button>
+        </form>
+        <button class="btn btn-secondary" id="pin-toggle">Već imam PIN</button>
+      </div>
     </div>
 
     <!-- Main App (hidden until PIN set) -->
     <div id="main-app" class="hidden">
+      <aside class="app-sidebar">
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <span class="sidebar-brand-name">Moj Pritisak</span>
+        </div>
+      </aside>
+
+      <nav class="app-nav">
+        <button class="nav-tab active" data-view="danas">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+          <span>Danas</span>
+        </button>
+        <button class="nav-tab" data-view="historija">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+          <span>Historija</span>
+        </button>
+        <button class="nav-tab" data-view="trendovi">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 7l-8.5 8.5-4-4L2 17"/><path d="M16 7h6v6"/></svg></span>
+          <span>Trendovi</span>
+        </button>
+      </nav>
+
+      <div class="app-main">
       <div id="error-banner" class="error-banner hidden">
         <span>Greška pri učitavanju. Provjeri internet vezu.</span>
         <button class="btn btn-small btn-danger" id="retry-btn">Pokušaj ponovo</button>
@@ -744,54 +1262,55 @@
       <!-- Danas -->
       <div id="view-danas" class="view active">
         <div class="header">
-          <h1>Moj Pritisak</h1>
+          <div class="header-left">
+            <h1>Moj Pritisak</h1>
+            <div class="header-greeting" id="danas-date"></div>
+          </div>
           <div class="header-actions">
-            <div class="header-date" id="danas-date"></div>
-            <button class="icon-btn" id="settings-btn" title="Postavke">⚙️</button>
+            <div class="header-quick-actions">
+              <button class="btn btn-outline btn-small" id="desk-fab-bowel">+ Stolica</button>
+              <button class="btn btn-accent btn-small" id="desk-fab-probiotic">+ Probiotik</button>
+              <button class="btn btn-primary btn-small" id="desk-fab-measurement">+ Mjerenje</button>
+            </div>
+            <button class="icon-btn" id="settings-btn" title="Postavke" aria-label="Postavke">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
           </div>
         </div>
         <div id="danas-critical" class="critical-banner hidden"></div>
-        <div id="danas-content"></div>
+        <div id="danas-content" class="content-grid"></div>
       </div>
 
       <!-- Historija -->
       <div id="view-historija" class="view">
         <div class="header">
-          <h1>Historija</h1>
+          <div class="header-left">
+            <h1>Historija</h1>
+            <div class="header-greeting">Pregled svih unosa</div>
+          </div>
         </div>
-        <button class="btn export-btn" id="export-btn">Izvezi JSON</button>
+        <button class="btn export-btn" id="export-btn">Exportuj tabelu</button>
         <div id="historija-content"></div>
       </div>
 
       <!-- Trendovi -->
       <div id="view-trendovi" class="view">
         <div class="header">
-          <h1>Trendovi</h1>
+          <div class="header-left">
+            <h1>Trendovi</h1>
+            <div class="header-greeting">Statistike i analiza</div>
+          </div>
         </div>
         <div id="trendovi-content"></div>
       </div>
 
-      <!-- FABs -->
+      <!-- FABs (mobile) -->
       <div class="fab-container" id="fab-container">
         <button class="fab fab-primary" id="fab-measurement">+ Mjerenje</button>
         <button class="fab fab-secondary" id="fab-bowel">+ Stolica</button>
+        <button class="fab fab-tertiary" id="fab-probiotic">+ Probiotik</button>
       </div>
-
-      <!-- Bottom Nav -->
-      <nav class="bottom-nav">
-        <button class="nav-tab active" data-view="danas">
-          <span class="nav-icon">📊</span>
-          <span>Danas</span>
-        </button>
-        <button class="nav-tab" data-view="historija">
-          <span class="nav-icon">📅</span>
-          <span>Historija</span>
-        </button>
-        <button class="nav-tab" data-view="trendovi">
-          <span class="nav-icon">📈</span>
-          <span>Trendovi</span>
-        </button>
-      </nav>
+      </div><!-- .app-main -->
     </div>
   </div>
 
@@ -852,6 +1371,30 @@
     </div>
   </div>
 
+  <!-- Add Probiotic Modal -->
+  <div class="modal-overlay" id="modal-probiotic">
+    <div class="modal">
+      <h2>Novi probiotik</h2>
+      <form id="form-probiotic">
+        <div class="form-group">
+          <label>Vrsta probiotika (možete odabrati više)</label>
+          <div class="probiotic-grid" id="probiotic-grid"></div>
+          <div class="field-error hidden" id="err-probiotic-types"></div>
+        </div>
+        <div class="form-group">
+          <label for="p-note">Bilješka</label>
+          <input type="text" id="p-note" placeholder="Opcionalno...">
+        </div>
+        <div class="form-group">
+          <label for="p-datetime">Datum i vrijeme</label>
+          <input type="datetime-local" id="p-datetime">
+          <div class="field-error hidden" id="err-probiotic-datetime"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Sačuvaj</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Settings Modal -->
   <div class="modal-overlay" id="modal-settings">
     <div class="modal">
@@ -889,7 +1432,8 @@
 
     const MOCK_KEYS = {
       measurements: 'moj_pritisak_mock_measurements',
-      bowel_movements: 'moj_pritisak_mock_bowel_movements'
+      bowel_movements: 'moj_pritisak_mock_bowel_movements',
+      probiotic_entries: 'moj_pritisak_mock_probiotic_entries'
     };
 
     let db = null;
@@ -951,6 +1495,17 @@
       { num: 7, label: 'Vodenasto (proljev)', color: '#E8C98A' }
     ];
 
+    const PROBIOTIC_TYPES = [
+      { key: 'bulardi', label: 'Bulardi' },
+      { key: 'omnibiotic_stress', label: 'Omnibiotic Stress' },
+      { key: 'omnibiotic_10', label: 'Omnibiotic 10' },
+      { key: 'colosal', label: 'Colosal' },
+      { key: 'enterosgel', label: 'Enterosgel' },
+      { key: 'linex', label: 'Linex' },
+      { key: 'enterofuril', label: 'Enterofuril' },
+      { key: 'colobalance', label: 'Colobalance' }
+    ];
+
     const BP_CATEGORIES = [
       { key: 'nisko', label: 'Nisko', color: '#5B8DB8' },
       { key: 'normalno', label: 'Normalno', color: '#3A8A5C' },
@@ -964,6 +1519,7 @@
     let currentView = 'danas';
     let historijaDaysLoaded = 30;
     let selectedBowelType = null;
+    let selectedProbioticTypes = new Set();
     let isExistingPin = false;
 
     async function hashPin(pin) {
@@ -1008,6 +1564,17 @@
 
     function getBowelType(num) {
       return BOWEL_TYPES.find(t => t.num === num) || BOWEL_TYPES[3];
+    }
+
+    function getProbioticLabel(key) {
+      return PROBIOTIC_TYPES.find(p => p.key === key)?.label || key;
+    }
+
+    function getTableForRecordType(type) {
+      if (type === 'measurement') return 'measurements';
+      if (type === 'bowel') return 'bowel_movements';
+      if (type === 'probiotic') return 'probiotic_entries';
+      return null;
     }
 
     function showError(show) {
@@ -1145,19 +1712,42 @@
       return data || [];
     }
 
+    async function fetchProbiotics(fromDate, toDate) {
+      if (USE_MOCK) {
+        return mockFilterRows(mockGetTable('probiotic_entries'), 'taken_at', fromDate, toDate);
+      }
+      let query = db
+        .from('probiotic_entries')
+        .select('*')
+        .eq('pin_hash', currentPinHash)
+        .order('taken_at', { ascending: true });
+      if (fromDate) query = query.gte('taken_at', fromDate.toISOString());
+      if (toDate) query = query.lte('taken_at', toDate.toISOString());
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    }
+
     async function fetchAllData() {
       if (USE_MOCK) {
         const measurements = mockGetTable('measurements').filter(r => r.pin_hash === currentPinHash);
         const bowel = mockGetTable('bowel_movements').filter(r => r.pin_hash === currentPinHash);
-        return { measurements, bowel };
+        const probiotics = mockGetTable('probiotic_entries').filter(r => r.pin_hash === currentPinHash);
+        return { measurements, bowel, probiotics };
       }
-      const [measurements, bowel] = await Promise.all([
+      const [measurements, bowel, probiotics] = await Promise.all([
         db.from('measurements').select('*').eq('pin_hash', currentPinHash).order('measured_at', { ascending: true }),
-        db.from('bowel_movements').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true })
+        db.from('bowel_movements').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true }),
+        db.from('probiotic_entries').select('*').eq('pin_hash', currentPinHash).order('taken_at', { ascending: true })
       ]);
       if (measurements.error) throw measurements.error;
       if (bowel.error) throw bowel.error;
-      return { measurements: measurements.data || [], bowel: bowel.data || [] };
+      if (probiotics.error) throw probiotics.error;
+      return {
+        measurements: measurements.data || [],
+        bowel: bowel.data || [],
+        probiotics: probiotics.data || []
+      };
     }
 
     async function deleteRecord(table, id) {
@@ -1188,6 +1778,16 @@
       return db.from('bowel_movements').insert(row);
     }
 
+    async function insertProbiotic(row) {
+      if (USE_MOCK) {
+        const rows = mockGetTable('probiotic_entries');
+        rows.push({ ...row, id: crypto.randomUUID(), created_at: new Date().toISOString() });
+        mockSaveTable('probiotic_entries', rows);
+        return { error: null };
+      }
+      return db.from('probiotic_entries').insert(row);
+    }
+
     // Danas view
     async function loadDanas() {
       const container = document.getElementById('danas-content');
@@ -1201,16 +1801,17 @@
         const tomorrow = new Date(todayStart);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const [measurements, bowel] = await Promise.all([
+        const [measurements, bowel, probiotics] = await Promise.all([
           fetchMeasurements(todayStart, tomorrow),
-          fetchBowel(todayStart, tomorrow)
+          fetchBowel(todayStart, tomorrow),
+          fetchProbiotics(todayStart, tomorrow)
         ]);
 
         let html = '';
         let hasCritical = false;
 
-        if (measurements.length === 0 && bowel.length === 0) {
-          html = '<div class="empty-state">Nema mjerenja za danas. Dodaj prvo mjerenje.</div>';
+        if (measurements.length === 0 && bowel.length === 0 && probiotics.length === 0) {
+          html = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>Nema mjerenja za danas.<br>Dodaj prvo mjerenje.</div>`;
         } else {
           measurements.forEach(m => {
             const cls = classifyBP(m.systolic, m.diastolic);
@@ -1219,8 +1820,13 @@
           });
 
           if (bowel.length > 0) {
-            html += '<div class="section-title">Stolica</div>';
+            html += '<div class="section-title" style="grid-column:1/-1">Stolica</div>';
             bowel.forEach(b => { html += renderBowelCard(b); });
+          }
+
+          if (probiotics.length > 0) {
+            html += '<div class="section-title section-title-accent" style="grid-column:1/-1">Probiotik</div>';
+            probiotics.forEach(p => { html += renderProbioticCard(p); });
           }
         }
 
@@ -1247,7 +1853,7 @@
             <span class="badge" style="background:${cls.color}">${cls.label}</span>
           </div>
           <div class="bp-value">${m.systolic}/${m.diastolic} <span class="bp-unit">mmHg</span></div>
-          <div class="pulse">♥ ${m.pulse} otkucaja/min</div>
+          <div class="pulse"><span class="pulse-icon">♥</span> ${m.pulse} otkucaja/min</div>
           ${m.note ? `<div class="card-note">${escapeHtml(m.note)}</div>` : ''}
           <div class="card-actions">
             <button class="delete-btn" data-id="${m.id}" data-type="measurement" title="Obriši">🗑</button>
@@ -1269,6 +1875,22 @@
         </div>`;
     }
 
+    function renderProbioticCard(p) {
+      const types = Array.isArray(p.types) ? p.types : [];
+      const chips = types.map(t => `<span class="probiotic-chip">${escapeHtml(getProbioticLabel(t))}</span>`).join('');
+      return `
+        <div class="card probiotic-card" data-id="${p.id}" data-type="probiotic">
+          <div class="bowel-row">
+            <span class="card-time">${formatTime(p.taken_at)}</span>
+            <span class="probiotic-icon">💊</span>
+            <span class="bowel-label">Probiotik</span>
+            <button class="delete-btn" data-id="${p.id}" data-type="probiotic" title="Obriši" style="margin-left:auto">🗑</button>
+          </div>
+          <div class="probiotic-chips">${chips}</div>
+          ${p.note ? `<div class="card-note">${escapeHtml(p.note)}</div>` : ''}
+        </div>`;
+    }
+
     function escapeHtml(str) {
       const div = document.createElement('div');
       div.textContent = str;
@@ -1282,7 +1904,8 @@
           if (!confirm('Jeste li sigurni da želite obrisati ovaj unos?')) return;
           const id = btn.dataset.id;
           const type = btn.dataset.type;
-          const table = type === 'measurement' ? 'measurements' : 'bowel_movements';
+          const table = getTableForRecordType(type);
+          if (!table) return;
           const { error } = await deleteRecord(table, id);
           if (error) { alert('Greška pri brisanju.'); return; }
           loadCurrentView();
@@ -1303,29 +1926,36 @@
         startDate.setDate(startDate.getDate() - historijaDaysLoaded);
         startDate.setHours(0, 0, 0, 0);
 
-        const [measurements, bowel] = await Promise.all([
+        const [measurements, bowel, probiotics] = await Promise.all([
           fetchMeasurements(startDate, endDate),
-          fetchBowel(startDate, endDate)
+          fetchBowel(startDate, endDate),
+          fetchProbiotics(startDate, endDate)
         ]);
 
         const dayMap = {};
 
         measurements.forEach(m => {
           const key = localDateKey(m.measured_at);
-          if (!dayMap[key]) dayMap[key] = { date: new Date(m.measured_at), measurements: [], bowel: [] };
+          if (!dayMap[key]) dayMap[key] = { date: new Date(m.measured_at), measurements: [], bowel: [], probiotics: [] };
           dayMap[key].measurements.push(m);
         });
 
         bowel.forEach(b => {
           const key = localDateKey(b.recorded_at);
-          if (!dayMap[key]) dayMap[key] = { date: new Date(b.recorded_at), measurements: [], bowel: [] };
+          if (!dayMap[key]) dayMap[key] = { date: new Date(b.recorded_at), measurements: [], bowel: [], probiotics: [] };
           dayMap[key].bowel.push(b);
+        });
+
+        probiotics.forEach(p => {
+          const key = localDateKey(p.taken_at);
+          if (!dayMap[key]) dayMap[key] = { date: new Date(p.taken_at), measurements: [], bowel: [], probiotics: [] };
+          dayMap[key].probiotics.push(p);
         });
 
         const sortedDays = Object.keys(dayMap).sort((a, b) => b.localeCompare(a));
 
         if (sortedDays.length === 0) {
-          container.innerHTML = '<div class="empty-state">Nema podataka za prikaz.</div>';
+          container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>Nema podataka za prikaz.</div>';
           return;
         }
 
@@ -1344,19 +1974,20 @@
               <div class="day-header">
                 <div class="day-header-left">
                   <h3>${formatDateLong(day.date)}</h3>
-                  <div class="day-header-stats">${day.measurements.length} mjerenja · ${day.bowel.length} stolica</div>
+                  <div class="day-header-stats">${day.measurements.length} mjerenja · ${day.bowel.length} stolica · ${day.probiotics.length} probiotik</div>
                 </div>
                 <div style="text-align:right">
                   <div class="day-header-avg">${avgSys}/${avgDia}</div>
                   <span class="day-chevron">▼</span>
                 </div>
               </div>
-              <div class="day-content">`;
+              <div class="day-content"><div class="content-grid">`;
 
           day.measurements.forEach(m => { html += renderMeasurementCard(m); });
           day.bowel.forEach(b => { html += renderBowelCard(b); });
+          day.probiotics.forEach(p => { html += renderProbioticCard(p); });
 
-          html += '</div></div>';
+          html += '</div></div></div>';
         });
 
         html += '<button class="btn btn-primary load-more-btn" id="load-more-btn">Učitaj starije</button>';
@@ -1381,15 +2012,74 @@
       }
     }
 
+    function csvEscape(val) {
+      const s = val == null ? '' : String(val);
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    }
+
+    function buildExportCsv(data) {
+      const headers = ['tip', 'datum_vrijeme', 'gornji_pritisak', 'donji_pritisak', 'puls', 'tip_stolice', 'probiotici', 'biljeska'];
+      const rows = [];
+
+      data.measurements.forEach(m => {
+        rows.push({
+          tip: 'mjerenje',
+          datum_vrijeme: m.measured_at,
+          gornji_pritisak: m.systolic,
+          donji_pritisak: m.diastolic,
+          puls: m.pulse,
+          tip_stolice: '',
+          probiotici: '',
+          biljeska: m.note || ''
+        });
+      });
+
+      data.bowel.forEach(b => {
+        rows.push({
+          tip: 'stolica',
+          datum_vrijeme: b.recorded_at,
+          gornji_pritisak: '',
+          donji_pritisak: '',
+          puls: '',
+          tip_stolice: b.type,
+          probiotici: '',
+          biljeska: b.note || ''
+        });
+      });
+
+      (data.probiotics || []).forEach(p => {
+        const types = Array.isArray(p.types) ? p.types : [];
+        rows.push({
+          tip: 'probiotik',
+          datum_vrijeme: p.taken_at,
+          gornji_pritisak: '',
+          donji_pritisak: '',
+          puls: '',
+          tip_stolice: '',
+          probiotici: types.map(getProbioticLabel).join('; '),
+          biljeska: p.note || ''
+        });
+      });
+
+      rows.sort((a, b) => new Date(a.datum_vrijeme) - new Date(b.datum_vrijeme));
+
+      const lines = [headers.join(',')];
+      rows.forEach(row => {
+        lines.push(headers.map(h => csvEscape(row[h])).join(','));
+      });
+      return lines.join('\n');
+    }
+
     // Export
     document.getElementById('export-btn').addEventListener('click', async () => {
       try {
         const data = await fetchAllData();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob(['\uFEFF' + buildExportCsv(data)], { type: 'text/csv;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `moj-pritisak-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `moj-pritisak-${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
       } catch (e) {
@@ -1408,9 +2098,10 @@
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 90);
 
-        const [measurements, bowel] = await Promise.all([
+        const [measurements, bowel, probiotics] = await Promise.all([
           fetchMeasurements(startDate, endDate),
-          fetchBowel(startDate, endDate)
+          fetchBowel(startDate, endDate),
+          fetchProbiotics(startDate, endDate)
         ]);
 
         const now = new Date();
@@ -1449,6 +2140,17 @@
         for (let i = 1; i <= 7; i++) bowelTypeCounts[i] = 0;
         b7.forEach(b => bowelTypeCounts[b.type]++);
         const maxBowelCount = Math.max(...Object.values(bowelTypeCounts), 1);
+
+        const p7 = probiotics.filter(p => new Date(p.taken_at) >= d7);
+        const probioticTypeCounts = {};
+        PROBIOTIC_TYPES.forEach(t => probioticTypeCounts[t.key] = 0);
+        p7.forEach(p => {
+          (Array.isArray(p.types) ? p.types : []).forEach(t => {
+            if (probioticTypeCounts[t] !== undefined) probioticTypeCounts[t]++;
+          });
+        });
+        const maxProbioticCount = Math.max(...Object.values(probioticTypeCounts), 1);
+        const probioticAvgDaily = (p7.length / 7).toFixed(1);
 
         let html = '';
 
@@ -1499,8 +2201,23 @@
         });
         html += '</div></div>';
 
+        html += `<div class="stat-card">
+          <h3>Probiotik — zadnjih 7 dana</h3>
+          <p style="margin-bottom:12px">Unosa dnevno: <strong>${probioticAvgDaily}</strong> · Ukupno: <strong>${p7.length}</strong></p>
+          <div class="bar-chart">`;
+        PROBIOTIC_TYPES.forEach(t => {
+          const count = probioticTypeCounts[t.key] || 0;
+          const pct = (count / maxProbioticCount) * 100;
+          html += `<div class="bar-row">
+            <span class="bar-label">${t.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--accent-mid),var(--accent))"></div></div>
+            <span class="bar-count">${count}</span>
+          </div>`;
+        });
+        html += '</div></div>';
+
         if (measurements.length === 0) {
-          html = '<div class="empty-state">Nema dovoljno podataka za trendove. Dodajte mjerenja.</div>';
+          html = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 7l-8.5 8.5-4-4L2 17"/></svg></div>Nema dovoljno podataka za trendove.<br>Dodajte mjerenja.</div>';
         }
 
         container.innerHTML = html;
@@ -1584,7 +2301,7 @@
       });
     });
 
-    document.getElementById('fab-measurement').addEventListener('click', () => {
+    function openMeasurementModal() {
       clearMeasurementErrors();
       document.getElementById('m-systolic').value = '';
       document.getElementById('m-diastolic').value = '';
@@ -1592,16 +2309,33 @@
       document.getElementById('m-note').value = '';
       document.getElementById('m-datetime').value = toLocalDatetimeValue(new Date());
       openModal('modal-measurement');
-    });
+    }
 
-    document.getElementById('fab-bowel').addEventListener('click', () => {
+    function openBowelModal() {
       selectedBowelType = null;
       showFieldError('err-bowel-type', null);
       document.getElementById('b-note').value = '';
       document.getElementById('b-datetime').value = toLocalDatetimeValue(new Date());
       renderBowelGrid();
       openModal('modal-bowel');
-    });
+    }
+
+    function openProbioticModal() {
+      selectedProbioticTypes = new Set();
+      showFieldError('err-probiotic-types', null);
+      showFieldError('err-probiotic-datetime', null);
+      document.getElementById('p-note').value = '';
+      document.getElementById('p-datetime').value = toLocalDatetimeValue(new Date());
+      renderProbioticGrid();
+      openModal('modal-probiotic');
+    }
+
+    document.getElementById('fab-measurement').addEventListener('click', openMeasurementModal);
+    document.getElementById('desk-fab-measurement').addEventListener('click', openMeasurementModal);
+    document.getElementById('fab-bowel').addEventListener('click', openBowelModal);
+    document.getElementById('desk-fab-bowel').addEventListener('click', openBowelModal);
+    document.getElementById('fab-probiotic').addEventListener('click', openProbioticModal);
+    document.getElementById('desk-fab-probiotic').addEventListener('click', openProbioticModal);
 
     function renderBowelGrid() {
       const grid = document.getElementById('bowel-grid');
@@ -1617,6 +2351,24 @@
         btn.addEventListener('click', () => {
           selectedBowelType = parseInt(btn.dataset.type);
           renderBowelGrid();
+        });
+      });
+    }
+
+    function renderProbioticGrid() {
+      const grid = document.getElementById('probiotic-grid');
+      grid.innerHTML = PROBIOTIC_TYPES.map(t => `
+        <button type="button" class="probiotic-type-btn ${selectedProbioticTypes.has(t.key) ? 'selected' : ''}" data-key="${t.key}">
+          ${t.label}
+        </button>
+      `).join('');
+
+      grid.querySelectorAll('.probiotic-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.key;
+          if (selectedProbioticTypes.has(key)) selectedProbioticTypes.delete(key);
+          else selectedProbioticTypes.add(key);
+          renderProbioticGrid();
         });
       });
     }
@@ -1689,6 +2441,36 @@
       else switchView('danas');
     });
 
+    document.getElementById('form-probiotic').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showFieldError('err-probiotic-types', null);
+      showFieldError('err-probiotic-datetime', null);
+
+      if (selectedProbioticTypes.size === 0) {
+        showFieldError('err-probiotic-types', 'Odaberite barem jedan probiotik.');
+        return;
+      }
+
+      const note = document.getElementById('p-note').value.trim();
+      const dt = document.getElementById('p-datetime').value;
+      if (!dt) {
+        showFieldError('err-probiotic-datetime', 'Odaberite datum i vrijeme.');
+        return;
+      }
+
+      const { error } = await insertProbiotic({
+        taken_at: new Date(dt).toISOString(),
+        types: Array.from(selectedProbioticTypes),
+        note: note || null,
+        pin_hash: currentPinHash
+      });
+
+      if (error) { alert('Greška pri spremanju.'); return; }
+      closeModal('modal-probiotic');
+      if (currentView === 'danas') loadDanas();
+      else switchView('danas');
+    });
+
     // Settings
     document.getElementById('settings-btn').addEventListener('click', () => {
       document.getElementById('old-pin').value = '';
@@ -1738,6 +2520,7 @@
     // Init
     initPinScreen();
     renderBowelGrid();
+    renderProbioticGrid();
     })();
   </script>
 </body>
