@@ -70,16 +70,16 @@
       background: var(--surface);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
-      padding: 40px 32px;
-      max-width: 420px;
+      padding: 32px 28px;
+      max-width: 360px;
       width: 100%;
       border: 1px solid var(--border);
     }
 
     .pin-logo {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 16px;
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
       background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-soft) 100%);
       border-radius: 50%;
       display: flex;
@@ -92,31 +92,39 @@
     .pin-logo svg { width: 32px; height: 32px; }
 
     .pin-title {
-      font-size: 1.75rem;
+      font-size: 1.35rem;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 20px;
       letter-spacing: -0.02em;
     }
 
-    .pin-subtitle {
+    .pin-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
       color: var(--text-secondary);
-      margin-bottom: 28px;
-      font-size: 0.95rem;
-      line-height: 1.6;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .pin-subtitle {
+      display: none;
+    }
+
+    #pin-form .btn-primary {
+      margin-top: 20px;
     }
 
     .pin-input {
-      font-size: 2rem;
-      letter-spacing: 0.45em;
+      font-size: 1.75rem;
+      letter-spacing: 0.4em;
       text-align: center;
       width: 100%;
-      max-width: 200px;
       padding: 14px;
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       background: var(--bg);
-      margin: 0 auto 20px;
       display: block;
       font-weight: 600;
       color: var(--text);
@@ -1328,12 +1336,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         </div>
         <div class="pin-title">Moj Pritisak</div>
-        <p class="pin-subtitle" id="pin-message">Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.</p>
         <form id="pin-form">
-          <input type="tel" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="••••">
-          <button type="submit" class="btn btn-primary btn-block" id="pin-submit">Postavi PIN</button>
+          <label class="pin-label" for="pin-input">Unesi PIN</label>
+          <input type="tel" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="••••">
+          <div class="field-error hidden" id="err-pin"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="pin-submit">Ulazi</button>
         </form>
-        <button class="btn btn-secondary" id="pin-toggle">Već imam PIN</button>
       </div>
     </div>
 
@@ -1525,26 +1533,9 @@
         <h2>Postavke</h2>
         <button type="button" class="modal-close" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>
-      <form id="form-settings">
-        <div class="form-group">
-          <label for="old-pin">Stari PIN</label>
-          <input type="tel" id="old-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
-          <div class="field-error hidden" id="err-old-pin"></div>
-        </div>
-        <div class="form-group">
-          <label for="new-pin">Novi PIN</label>
-          <input type="tel" id="new-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
-          <div class="field-error hidden" id="err-new-pin"></div>
-        </div>
-        <div class="form-group">
-          <label for="confirm-pin">Potvrdi novi PIN</label>
-          <input type="tel" id="confirm-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
-          <div class="field-error hidden" id="err-confirm-pin"></div>
-        </div>
-        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:16px;">Promjena PIN-a ne prenosi postojeće podatke na novi PIN.</p>
-        <button type="submit" class="btn btn-primary btn-block" id="change-pin-btn">Promijeni PIN</button>
-        <button type="button" class="btn btn-secondary" id="close-settings" style="width:100%;margin-top:8px;">Zatvori</button>
-      </form>
+      <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:20px;">Odjava uklanja pristup s ovog uređaja. PIN ostaje isti za sve korisnike.</p>
+      <button type="button" class="btn btn-outline btn-block" id="logout-btn">Odjava</button>
+      <button type="button" class="btn btn-secondary" id="close-settings" style="width:100%;margin-top:8px;">Zatvori</button>
     </div>
   </div>
 
@@ -1621,6 +1612,7 @@
     }
 
     const PIN_KEY = 'moj_pritisak_pin_hash';
+    const APP_PIN = '1405';
     const DAYS = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
     const MONTHS = ['januar', 'februar', 'mart', 'april', 'maj', 'juni', 'juli', 'august', 'septembar', 'oktobar', 'novembar', 'decembar'];
 
@@ -1659,7 +1651,6 @@
     let historijaDaysLoaded = 30;
     let selectedBowelType = null;
     let selectedProbioticTypes = new Set();
-    let isExistingPin = false;
 
     async function hashPin(pin) {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
@@ -1761,49 +1752,39 @@
       ['err-systolic', 'err-diastolic', 'err-pulse', 'err-datetime'].forEach(id => showFieldError(id, null));
     }
 
-    // PIN Screen
+    // PIN — fiksni PIN 1405
+    const appPinHash = await hashPin(APP_PIN);
+
     function initPinScreen() {
       const stored = localStorage.getItem(PIN_KEY);
-      if (stored) {
-        currentPinHash = stored;
+      if (stored === appPinHash) {
+        currentPinHash = appPinHash;
         showMainApp();
         return;
       }
+      if (stored) localStorage.removeItem(PIN_KEY);
       document.getElementById('pin-screen').classList.remove('hidden');
       document.getElementById('main-app').classList.add('hidden');
     }
 
-    document.getElementById('pin-toggle').addEventListener('click', () => {
-      isExistingPin = !isExistingPin;
-      const msg = document.getElementById('pin-message');
-      const btn = document.getElementById('pin-submit');
-      const toggle = document.getElementById('pin-toggle');
-      if (isExistingPin) {
-        msg.innerHTML = 'Unesite postojeći PIN za pristup podacima.';
-        btn.textContent = 'Prijavi se';
-        toggle.textContent = 'Postavi novi PIN';
-      } else {
-        msg.innerHTML = 'Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.';
-        btn.textContent = 'Postavi PIN';
-        toggle.textContent = 'Već imam PIN';
-      }
-      document.getElementById('pin-input').value = '';
-    });
-
     document.getElementById('pin-input').addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      showFieldError('err-pin', null);
     });
 
     async function submitPin(e) {
       if (e) e.preventDefault();
       const pin = document.getElementById('pin-input').value;
       if (pin.length !== 4) {
-        alert('PIN mora imati 4 cifre.');
+        showFieldError('err-pin', 'PIN mora imati 4 cifre.');
         return;
       }
-      const hash = await hashPin(pin);
-      localStorage.setItem(PIN_KEY, hash);
-      currentPinHash = hash;
+      if (pin !== APP_PIN) {
+        showFieldError('err-pin', 'PIN nije ispravan.');
+        return;
+      }
+      localStorage.setItem(PIN_KEY, appPinHash);
+      currentPinHash = appPinHash;
       showMainApp();
     }
 
@@ -2651,49 +2632,19 @@
 
     // Settings
     document.getElementById('settings-btn').addEventListener('click', () => {
-      document.getElementById('old-pin').value = '';
-      document.getElementById('new-pin').value = '';
-      document.getElementById('confirm-pin').value = '';
-      ['err-old-pin', 'err-new-pin', 'err-confirm-pin'].forEach(id => showFieldError(id, null));
       openModal('modal-settings');
     });
 
     document.getElementById('close-settings').addEventListener('click', () => closeModal('modal-settings'));
 
-    document.getElementById('form-settings').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      ['err-old-pin', 'err-new-pin', 'err-confirm-pin'].forEach(id => showFieldError(id, null));
-
-      const oldPin = document.getElementById('old-pin').value;
-      const newPin = document.getElementById('new-pin').value;
-      const confirmPin = document.getElementById('confirm-pin').value;
-
-      const oldHash = await hashPin(oldPin);
-      if (oldHash !== currentPinHash) {
-        showFieldError('err-old-pin', 'Stari PIN nije ispravan.');
-        return;
-      }
-      if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-        showFieldError('err-new-pin', 'Novi PIN mora imati 4 cifre.');
-        return;
-      }
-      if (newPin !== confirmPin) {
-        showFieldError('err-confirm-pin', 'PIN-ovi se ne poklapaju.');
-        return;
-      }
-
-      const newHash = await hashPin(newPin);
-      localStorage.setItem(PIN_KEY, newHash);
-      currentPinHash = newHash;
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem(PIN_KEY);
       closeModal('modal-settings');
-      alert('PIN je promijenjen. Napomena: podaci ostaju vezani za stari PIN u bazi.');
-      loadCurrentView();
-    });
-
-    ['old-pin', 'new-pin', 'confirm-pin'].forEach(id => {
-      document.getElementById(id).addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-      });
+      currentPinHash = null;
+      document.getElementById('main-app').classList.add('hidden');
+      document.getElementById('pin-screen').classList.remove('hidden');
+      document.getElementById('pin-input').value = '';
+      showFieldError('err-pin', null);
     });
 
     // Init
