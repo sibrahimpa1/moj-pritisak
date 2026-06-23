@@ -1,0 +1,6 @@
+// Kopiraj u config.local.js za lokalno testiranje s pravim Supabase-om.
+// config.local.js je u .gitignore i ne ide na GitHub.
+window.__SUPABASE_CONFIG__ = {
+  url: 'https://YOUR_PROJECT.supabase.co',
+  key: 'sb_publishable_YOUR_KEY_HERE'
+};

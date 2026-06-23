@@ -48,6 +48,29 @@ Aplikacija je dostupna na: **https://sibrahimpa1.github.io/moj-pritisak/**
 
 Pri prvom otvaranju postavite 4-cifreni PIN. Podijelite PIN s osobama kojima želite dati pristup istim podacima.
 
+## Lokalno razvojno okruženje
+
+### Mock baza (bez Supabase) — preporučeno za razvoj
+
+Na `localhost` aplikacija automatski koristi **mock bazu** u `localStorage` — nije potreban Supabase.
+
+```bash
+cd "/Users/senks/Desktop/Blood Pressure"
+python3 -m http.server 8080
+```
+
+Otvorite **http://localhost:8080** — vidjet ćete žuti banner „Lokalni mock”. PIN i svi podaci rade offline.
+
+Za mock i na produkcijskom URL-u dodajte `?mock=1` na kraj adrese.
+
+### Lokalno s pravim Supabase-om
+
+1. Kopirajte `config.local.js.example` → `config.local.js`
+2. Unesite svoj URL i publishable ključ
+3. Pokrenite lokalni server (gore)
+
+`config.local.js` je u `.gitignore` i ne ide na GitHub.
+
 ## Licenca
 
 MIT
