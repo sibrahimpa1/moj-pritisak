@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#2D6A9F">
   <title>Moj Pritisak</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/db.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -717,8 +717,10 @@
       <div class="pin-logo">🩺</div>
       <div class="pin-title">Moj Pritisak</div>
       <p class="pin-subtitle" id="pin-message">Dobrodošli u Moj Pritisak.<br>Unesite PIN koji ćete dijeliti s osobama kojima želite dati pristup.</p>
-      <input type="password" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="••••">
-      <button class="btn btn-primary" id="pin-submit">Postavi PIN</button>
+      <form id="pin-form">
+        <input type="tel" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="••••">
+        <button type="submit" class="btn btn-primary" id="pin-submit">Postavi PIN</button>
+      </form>
       <button class="btn btn-secondary" id="pin-toggle">Već imam PIN</button>
     </div>
 
@@ -869,7 +871,7 @@
     const SUPABASE_URL = 'SUPABASE_URL_HERE';
     const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY_HERE';
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const PIN_KEY = 'moj_pritisak_pin_hash';
     const DAYS = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
@@ -995,7 +997,8 @@
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
 
-    document.getElementById('pin-submit').addEventListener('click', async () => {
+    async function submitPin(e) {
+      if (e) e.preventDefault();
       const pin = document.getElementById('pin-input').value;
       if (pin.length !== 4) {
         alert('PIN mora imati 4 cifre.');
@@ -1005,7 +1008,10 @@
       localStorage.setItem(PIN_KEY, hash);
       currentPinHash = hash;
       showMainApp();
-    });
+    }
+
+    document.getElementById('pin-form').addEventListener('submit', submitPin);
+    document.getElementById('pin-submit').addEventListener('click', submitPin);
 
     function showMainApp() {
       document.getElementById('pin-screen').classList.add('hidden');
@@ -1071,8 +1077,8 @@
 
     async function fetchAllData() {
       const [measurements, bowel] = await Promise.all([
-        supabase.from('measurements').select('*').eq('pin_hash', currentPinHash).order('measured_at', { ascending: true }),
-        supabase.from('bowel_movements').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true })
+        db.from('measurements').select('*').eq('pin_hash', currentPinHash).order('measured_at', { ascending: true }),
+        db.from('bowel_movements').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true })
       ]);
       if (measurements.error) throw measurements.error;
       if (bowel.error) throw bowel.error;
@@ -1174,7 +1180,7 @@
           const id = btn.dataset.id;
           const type = btn.dataset.type;
           const table = type === 'measurement' ? 'measurements' : 'bowel_movements';
-          const { error } = await supabase.from(table).delete().eq('id', id).eq('pin_hash', currentPinHash);
+          const { error } = await db.from(table).delete().eq('id', id).eq('pin_hash', currentPinHash);
           if (error) { alert('Greška pri brisanju.'); return; }
           loadCurrentView();
         });
@@ -1541,7 +1547,7 @@
       }
       if (!valid) return;
 
-      const { error } = await supabase.from('measurements').insert({
+      const { error } = await db.from('measurements').insert({
         measured_at: new Date(dt).toISOString(),
         systolic: sys,
         diastolic: dia,
@@ -1567,7 +1573,7 @@
       const note = document.getElementById('b-note').value.trim();
       const dt = document.getElementById('b-datetime').value;
 
-      const { error } = await supabase.from('bowel_movements').insert({
+      const { error } = await db.from('bowel_movements').insert({
         recorded_at: new Date(dt).toISOString(),
         type: selectedBowelType,
         note: note || null,
