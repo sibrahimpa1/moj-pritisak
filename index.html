@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="config.local.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -344,6 +343,49 @@
 
     .card:hover { box-shadow: var(--shadow-md); }
 
+    .card-measurement {
+      padding: 12px 14px;
+    }
+
+    .card-measurement .measurement-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .card-measurement .measurement-main {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-measurement .bp-value {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .card-measurement .bp-unit {
+      font-size: 0.85rem;
+    }
+
+    .card-measurement .pulse {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+    }
+
+    .card-measurement .card-note {
+      margin-top: 8px;
+      padding-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    .card-measurement .delete-btn {
+      padding: 4px 8px;
+      font-size: 0.9rem;
+    }
+
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -673,25 +715,77 @@
       width: 100%;
       max-width: 520px;
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
+      padding: calc(12px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
       transform: translateY(100%);
       transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-      max-height: 92vh;
+      max-height: 90vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: var(--shadow-lg);
     }
 
     .modal-overlay.open .modal { transform: translateY(0); }
 
-    .modal h2 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-      color: var(--text);
-      letter-spacing: -0.02em;
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      margin: 4px auto 16px;
+      flex-shrink: 0;
     }
 
-    .form-group { margin-bottom: 18px; }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-top: 4px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: background 0.2s, color 0.2s;
+      padding: 0;
+    }
+
+    .modal-close:hover {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border-color: var(--accent-mid);
+    }
+
+    .modal-close svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .form-group { margin-bottom: 16px; }
 
     .form-group label {
       display: block;
@@ -732,25 +826,26 @@
 
     .bowel-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
     }
 
     .bowel-type-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      padding: 14px 10px;
+      gap: 3px;
+      padding: 8px 4px;
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: 10px;
       background: var(--bg);
       cursor: pointer;
-      font-size: 0.72rem;
+      font-size: 0.6rem;
       font-weight: 500;
       text-align: center;
       font-family: inherit;
       color: var(--text);
+      line-height: 1.2;
       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
     }
 
@@ -763,17 +858,24 @@
     }
 
     .bowel-swatch {
-      width: 32px;
-      height: 32px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.8);
+      border: 1.5px solid rgba(255,255,255,0.8);
       box-shadow: var(--shadow-sm);
     }
 
     .bowel-type-num {
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.8rem;
       color: var(--primary);
+    }
+
+    .bowel-type-btn span:last-child {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     /* Probiotics */
@@ -1171,7 +1273,10 @@
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       }
 
-      .bowel-grid { grid-template-columns: repeat(3, 1fr); }
+      .bowel-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+      .bowel-type-btn { padding: 10px 6px; font-size: 0.68rem; }
+      .bowel-swatch { width: 26px; height: 26px; }
 
       .modal-overlay {
         align-items: center;
@@ -1180,10 +1285,15 @@
 
       .modal {
         border-radius: var(--radius-lg);
+        padding: 28px;
         transform: translateY(24px) scale(0.97);
         opacity: 0;
         transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s;
       }
+
+      .modal-handle { display: none; }
+
+      .modal-header h2 { font-size: 1.35rem; }
 
       .modal-overlay.open .modal {
         transform: translateY(0) scale(1);
@@ -1255,7 +1365,7 @@
 
       <div class="app-main">
       <div id="error-banner" class="error-banner hidden">
-        <span>Greška pri učitavanju. Provjeri internet vezu.</span>
+        <span id="error-banner-text">Greška pri učitavanju. Provjeri internet vezu.</span>
         <button class="btn btn-small btn-danger" id="retry-btn">Pokušaj ponovo</button>
       </div>
 
@@ -1317,7 +1427,11 @@
   <!-- Add Measurement Modal -->
   <div class="modal-overlay" id="modal-measurement">
     <div class="modal">
-      <h2>Novo mjerenje</h2>
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Novo mjerenje</h2>
+        <button type="button" class="modal-close" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
       <form id="form-measurement">
         <div class="form-group">
           <label for="m-systolic">Gornji pritisak</label>
@@ -1351,7 +1465,11 @@
   <!-- Add Bowel Modal -->
   <div class="modal-overlay" id="modal-bowel">
     <div class="modal">
-      <h2>Nova stolica</h2>
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Nova stolica</h2>
+        <button type="button" class="modal-close" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
       <form id="form-bowel">
         <div class="form-group">
           <label>Tip stolice</label>
@@ -1374,7 +1492,11 @@
   <!-- Add Probiotic Modal -->
   <div class="modal-overlay" id="modal-probiotic">
     <div class="modal">
-      <h2>Novi probiotik</h2>
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Novi probiotik</h2>
+        <button type="button" class="modal-close" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
       <form id="form-probiotic">
         <div class="form-group">
           <label>Vrsta probiotika (možete odabrati više)</label>
@@ -1398,34 +1520,51 @@
   <!-- Settings Modal -->
   <div class="modal-overlay" id="modal-settings">
     <div class="modal">
-      <h2>Postavke</h2>
-      <div class="form-group">
-        <label for="old-pin">Stari PIN</label>
-        <input type="password" id="old-pin" maxlength="4" inputmode="numeric" placeholder="••••">
-        <div class="field-error hidden" id="err-old-pin"></div>
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Postavke</h2>
+        <button type="button" class="modal-close" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>
-      <div class="form-group">
-        <label for="new-pin">Novi PIN</label>
-        <input type="password" id="new-pin" maxlength="4" inputmode="numeric" placeholder="••••">
-        <div class="field-error hidden" id="err-new-pin"></div>
-      </div>
-      <div class="form-group">
-        <label for="confirm-pin">Potvrdi novi PIN</label>
-        <input type="password" id="confirm-pin" maxlength="4" inputmode="numeric" placeholder="••••">
-        <div class="field-error hidden" id="err-confirm-pin"></div>
-      </div>
-      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:16px;">Promjena PIN-a ne prenosi postojeće podatke na novi PIN.</p>
-      <button class="btn btn-primary" id="change-pin-btn" style="width:100%">Promijeni PIN</button>
-      <button class="btn btn-secondary" id="close-settings" style="width:100%;margin-top:8px;">Zatvori</button>
+      <form id="form-settings">
+        <div class="form-group">
+          <label for="old-pin">Stari PIN</label>
+          <input type="tel" id="old-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
+          <div class="field-error hidden" id="err-old-pin"></div>
+        </div>
+        <div class="form-group">
+          <label for="new-pin">Novi PIN</label>
+          <input type="tel" id="new-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
+          <div class="field-error hidden" id="err-new-pin"></div>
+        </div>
+        <div class="form-group">
+          <label for="confirm-pin">Potvrdi novi PIN</label>
+          <input type="tel" id="confirm-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
+          <div class="field-error hidden" id="err-confirm-pin"></div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:16px;">Promjena PIN-a ne prenosi postojeće podatke na novi PIN.</p>
+        <button type="submit" class="btn btn-primary btn-block" id="change-pin-btn">Promijeni PIN</button>
+        <button type="button" class="btn btn-secondary" id="close-settings" style="width:100%;margin-top:8px;">Zatvori</button>
+      </form>
     </div>
   </div>
 
   <script>
     (async function () {
+    const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+    if (IS_LOCAL) {
+      await new Promise(resolve => {
+        const s = document.createElement('script');
+        s.src = 'config.local.js';
+        s.onload = resolve;
+        s.onerror = resolve;
+        document.head.appendChild(s);
+      });
+    }
+
     const cfg = window.__SUPABASE_CONFIG__;
     const SUPABASE_URL = cfg?.url ?? 'SUPABASE_URL_HERE';
     const SUPABASE_ANON_KEY = cfg?.key ?? 'SUPABASE_ANON_KEY_HERE';
-    const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
     const FORCE_MOCK = new URLSearchParams(location.search).get('mock') === '1';
     const HAS_REAL_CONFIG = SUPABASE_URL !== 'SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'SUPABASE_ANON_KEY_HERE';
     const USE_MOCK = FORCE_MOCK || (IS_LOCAL && !HAS_REAL_CONFIG);
@@ -1577,8 +1716,35 @@
       return null;
     }
 
-    function showError(show) {
+    function isMissingTableError(error, tableName) {
+      if (!error) return false;
+      const blob = `${error.code || ''} ${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+      return blob.includes(tableName) ||
+        blob.includes('schema cache') ||
+        blob.includes('does not exist') ||
+        error.code === 'PGRST205' ||
+        error.code === '42P01';
+    }
+
+    function formatFetchError(error) {
+      if (!HAS_REAL_CONFIG) {
+        return 'Supabase nije konfigurisan. Provjerite GitHub Secrets (SUPABASE_URL, SUPABASE_ANON_KEY).';
+      }
+      if (isMissingTableError(error, 'probiotic_entries')) {
+        return 'Tabela probiotic_entries ne postoji. Pokrenite supabase_migration_probiotics.sql u Supabase SQL Editoru.';
+      }
+      if (isMissingTableError(error, 'measurements') || isMissingTableError(error, 'bowel_movements')) {
+        return 'Baza nije postavljena. Pokrenite supabase_setup.sql u Supabase SQL Editoru.';
+      }
+      if (error?.message) return error.message;
+      return 'Greška pri učitavanju. Provjeri internet vezu.';
+    }
+
+    function showError(show, message) {
       document.getElementById('error-banner').classList.toggle('hidden', !show);
+      if (message) {
+        document.getElementById('error-banner-text').textContent = message;
+      }
     }
 
     function showFieldError(id, msg) {
@@ -1724,7 +1890,13 @@
       if (fromDate) query = query.gte('taken_at', fromDate.toISOString());
       if (toDate) query = query.lte('taken_at', toDate.toISOString());
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        if (isMissingTableError(error, 'probiotic_entries')) {
+          console.warn('probiotic_entries tabela ne postoji — preskačem');
+          return [];
+        }
+        throw error;
+      }
       return data || [];
     }
 
@@ -1742,11 +1914,13 @@
       ]);
       if (measurements.error) throw measurements.error;
       if (bowel.error) throw bowel.error;
-      if (probiotics.error) throw probiotics.error;
+      if (probiotics.error && !isMissingTableError(probiotics.error, 'probiotic_entries')) {
+        throw probiotics.error;
+      }
       return {
         measurements: measurements.data || [],
         bowel: bowel.data || [],
-        probiotics: probiotics.data || []
+        probiotics: probiotics.error ? [] : (probiotics.data || [])
       };
     }
 
@@ -1816,7 +1990,7 @@
           measurements.forEach(m => {
             const cls = classifyBP(m.systolic, m.diastolic);
             if (cls.critical) hasCritical = true;
-            html += renderMeasurementCard(m, cls);
+            html += renderMeasurementCard(m);
           });
 
           if (bowel.length > 0) {
@@ -1840,24 +2014,22 @@
       } catch (e) {
         console.error(e);
         container.innerHTML = '';
-        showError(true);
+        showError(true, formatFetchError(e));
       }
     }
 
-    function renderMeasurementCard(m, cls) {
-      cls = cls || classifyBP(m.systolic, m.diastolic);
+    function renderMeasurementCard(m) {
       return `
-        <div class="card" data-id="${m.id}" data-type="measurement">
-          <div class="card-header">
+        <div class="card card-measurement" data-id="${m.id}" data-type="measurement">
+          <div class="measurement-top">
             <span class="card-time">${formatTime(m.measured_at)}</span>
-            <span class="badge" style="background:${cls.color}">${cls.label}</span>
-          </div>
-          <div class="bp-value">${m.systolic}/${m.diastolic} <span class="bp-unit">mmHg</span></div>
-          <div class="pulse"><span class="pulse-icon">♥</span> ${m.pulse} otkucaja/min</div>
-          ${m.note ? `<div class="card-note">${escapeHtml(m.note)}</div>` : ''}
-          <div class="card-actions">
             <button class="delete-btn" data-id="${m.id}" data-type="measurement" title="Obriši">🗑</button>
           </div>
+          <div class="measurement-main">
+            <span class="bp-value">${m.systolic}/${m.diastolic} <span class="bp-unit">mmHg</span></span>
+            <span class="pulse"><span class="pulse-icon">♥</span> ${m.pulse}</span>
+          </div>
+          ${m.note ? `<div class="card-note">${escapeHtml(m.note)}</div>` : ''}
         </div>`;
     }
 
@@ -2008,7 +2180,7 @@
       } catch (e) {
         console.error(e);
         container.innerHTML = '';
-        showError(true);
+        showError(true, formatFetchError(e));
       }
     }
 
@@ -2224,7 +2396,7 @@
       } catch (e) {
         console.error(e);
         container.innerHTML = '';
-        showError(true);
+        showError(true, formatFetchError(e));
       }
     }
 
@@ -2276,8 +2448,8 @@
       if (!avg30.sys) return 'Nema dovoljno mjerenja u zadnjih 30 dana za interpretaciju.';
       const cls = classifyBP(avg30.sys, avg30.dia);
       const texts = {
-        nisko: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je ispod normalnog raspona. Razgovarajte s liječnikom ako se osjećate vrtoglavim ili umornim.`,
-        normalno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je u normalnom rasponu. Nastavite s redovnim praćenjem i zdravim navikama.`,
+        nisko: `Prosjek zadnjih 30 dana: ${avg30.sys}/${avg30.dia} mmHg. Nastavite redovno praćenje.`,
+        normalno: `Prosjek zadnjih 30 dana: ${avg30.sys}/${avg30.dia} mmHg. Nastavite redovno praćenje.`,
         'visoko-normalno': `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je na gornjoj granici normale. Pazite na unos soli, stres i fizičku aktivnost.`,
         poviseno: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je povišen. Preporučujemo konzultaciju s liječnikom i praćenje na dnevnoj bazi.`,
         visoko: `Vaš prosječni pritisak u zadnjih 30 dana (${avg30.sys}/${avg30.dia} mmHg) je visok. Obratite se liječniku što prije.`,
@@ -2298,6 +2470,12 @@
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) closeModal(overlay.id);
+      });
+    });
+
+    document.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', () => {
+        closeModal(btn.closest('.modal-overlay').id);
       });
     });
 
@@ -2482,7 +2660,8 @@
 
     document.getElementById('close-settings').addEventListener('click', () => closeModal('modal-settings'));
 
-    document.getElementById('change-pin-btn').addEventListener('click', async () => {
+    document.getElementById('form-settings').addEventListener('submit', async (e) => {
+      e.preventDefault();
       ['err-old-pin', 'err-new-pin', 'err-confirm-pin'].forEach(id => showFieldError(id, null));
 
       const oldPin = document.getElementById('old-pin').value;
