@@ -10,6 +10,36 @@
   <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="theme-color" content="#4F7970">
   <title>Moj Pritisak</title>
+  <script>
+    (function () {
+      var BUILD = 'APP_VERSION_HERE';
+      var KEY = 'moj_pritisak_build';
+      if (BUILD === 'APP_VERSION_HERE') return;
+      function reloadOnce(version) {
+        if (location.search.indexOf('_refresh=') !== -1) return;
+        location.replace(location.pathname + '?_refresh=' + encodeURIComponent(version) + (location.hash || ''));
+      }
+      try {
+        var stored = localStorage.getItem(KEY);
+        if (stored && stored !== BUILD) {
+          localStorage.setItem(KEY, BUILD);
+          reloadOnce(BUILD);
+          return;
+        }
+        if (!stored) localStorage.setItem(KEY, BUILD);
+        fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var live = data && data.version;
+            if (!live || live === 'dev' || live === BUILD) return;
+            var prev = localStorage.getItem(KEY);
+            localStorage.setItem(KEY, live);
+            if (prev && prev !== live) reloadOnce(live);
+          })
+          .catch(function () {});
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1567,7 +1597,7 @@
         <div class="header">
           <div class="header-left">
             <h1>Trendovi</h1>
-            <div class="header-greeting">Statistike i analiza · v4</div>
+            <div class="header-greeting">Statistike i analiza</div>
           </div>
         </div>
         <div id="trendovi-content"></div>

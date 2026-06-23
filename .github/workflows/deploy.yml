@@ -35,6 +35,9 @@ jobs:
             echo "::error::Add SUPABASE_URL and SUPABASE_ANON_KEY as repository secrets."
             exit 1
           fi
+          VERSION="$(git rev-parse --short HEAD)-$(date -u +%Y%m%d%H%M%S)"
+          echo "{\"version\":\"${VERSION}\"}" > version.json
+          sed -i "s|APP_VERSION_HERE|${VERSION}|g" index.html
           sed -i "s|SUPABASE_URL_HERE|${SUPABASE_URL}|g" index.html
           sed -i "s|SUPABASE_ANON_KEY_HERE|${SUPABASE_ANON_KEY}|g" index.html
 
