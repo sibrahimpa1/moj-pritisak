@@ -632,16 +632,26 @@
       box-shadow: var(--shadow-md);
     }
 
-    /* FABs — mobile */
+    /* FABs — mobile (inline row) */
     .fab-container {
       position: fixed;
       bottom: var(--fab-bottom);
-      right: 20px;
+      left: 12px;
+      right: 12px;
       display: flex;
-      flex-direction: column-reverse;
-      gap: 10px;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
       z-index: 50;
+      overflow-x: auto;
+      padding: 4px 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+
+    .fab-container::-webkit-scrollbar { display: none; }
 
     .fab {
       border: none;
@@ -652,6 +662,7 @@
       box-shadow: var(--shadow-md);
       transition: transform 0.2s, box-shadow 0.2s;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .fab:hover {
@@ -662,23 +673,23 @@
     .fab-primary {
       background: var(--primary);
       color: white;
-      padding: 14px 22px;
-      font-size: 15px;
+      padding: 10px 14px;
+      font-size: 13px;
     }
 
     .fab-secondary {
       background: var(--surface);
       color: var(--primary);
       border: 1.5px solid var(--primary);
-      padding: 12px 18px;
-      font-size: 14px;
+      padding: 10px 14px;
+      font-size: 13px;
     }
 
     .fab-tertiary {
       background: var(--accent-soft);
       color: var(--accent-dark);
       border: 1.5px solid var(--accent-mid);
-      padding: 10px 16px;
+      padding: 10px 14px;
       font-size: 13px;
     }
 
@@ -687,6 +698,38 @@
       color: white;
       border-color: var(--accent);
     }
+
+    .fab-quaternary {
+      background: #EEF2FF;
+      color: #4338CA;
+      border: 1.5px solid #A5B4FC;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    .fab-quaternary:hover {
+      background: #4338CA;
+      color: white;
+      border-color: #4338CA;
+    }
+
+    .weight-card { padding: 16px 20px; }
+
+    .weight-value {
+      font-variant-numeric: tabular-nums;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .weight-unit {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .section-title-weight { color: #4338CA; }
 
     /* Navigation */
     .app-nav {
@@ -1569,6 +1612,7 @@
             <div class="header-quick-actions">
               <button class="btn btn-outline btn-small" id="desk-fab-bowel">+ Stolica</button>
               <button class="btn btn-accent btn-small" id="desk-fab-probiotic">+ Probiotik</button>
+              <button class="btn btn-small" id="desk-fab-weight" style="background:#EEF2FF;color:#4338CA;border:1.5px solid #A5B4FC">+ Kilaža</button>
               <button class="btn btn-primary btn-small" id="desk-fab-measurement">+ Pritisak</button>
             </div>
             <button class="icon-btn" id="settings-btn" title="Postavke" aria-label="Postavke">
@@ -1608,6 +1652,7 @@
         <button class="fab fab-primary" id="fab-measurement">+ Pritisak</button>
         <button class="fab fab-secondary" id="fab-bowel">+ Stolica</button>
         <button class="fab fab-tertiary" id="fab-probiotic">+ Probiotik</button>
+        <button class="fab fab-quaternary" id="fab-weight">+ Kilaža</button>
       </div>
       </div><!-- .app-main -->
     </div>
@@ -1706,6 +1751,34 @@
     </div>
   </div>
 
+  <!-- Add Weight Modal -->
+  <div class="modal-overlay" id="modal-weight">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Dodaj kilažu</h2>
+        <button type="button" class="modal-close" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <form id="form-weight">
+        <div class="form-group">
+          <label for="w-weight">Težina (kg)</label>
+          <input type="number" id="w-weight" placeholder="75.5" min="30" max="300" step="0.1" inputmode="decimal">
+          <div class="field-error hidden" id="err-weight"></div>
+        </div>
+        <div class="form-group">
+          <label for="w-note">Bilješka</label>
+          <input type="text" id="w-note" placeholder="Opcionalno...">
+        </div>
+        <div class="form-group">
+          <label for="w-datetime">Datum i vrijeme</label>
+          <input type="datetime-local" id="w-datetime">
+          <div class="field-error hidden" id="err-weight-datetime"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Sačuvaj kilažu</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Settings Modal -->
   <div class="modal-overlay" id="modal-settings">
     <div class="modal">
@@ -1744,7 +1817,8 @@
     const MOCK_KEYS = {
       measurements: 'moj_pritisak_mock_measurements',
       bowel_movements: 'moj_pritisak_mock_bowel_movements',
-      probiotic_entries: 'moj_pritisak_mock_probiotic_entries'
+      probiotic_entries: 'moj_pritisak_mock_probiotic_entries',
+      weight_entries: 'moj_pritisak_mock_weight_entries'
     };
 
     let db = null;
@@ -1884,6 +1958,7 @@
       if (type === 'measurement') return 'measurements';
       if (type === 'bowel') return 'bowel_movements';
       if (type === 'probiotic') return 'probiotic_entries';
+      if (type === 'weight') return 'weight_entries';
       return null;
     }
 
@@ -1903,6 +1978,9 @@
       }
       if (isMissingTableError(error, 'probiotic_entries')) {
         return 'Tabela probiotic_entries ne postoji. Pokrenite supabase_migration_probiotics.sql u Supabase SQL Editoru.';
+      }
+      if (isMissingTableError(error, 'weight_entries')) {
+        return 'Tabela weight_entries ne postoji. Pokrenite supabase_migration_weight.sql u Supabase SQL Editoru.';
       }
       if (isMissingTableError(error, 'measurements') || isMissingTableError(error, 'bowel_movements')) {
         return 'Baza nije postavljena. Pokrenite supabase_setup.sql u Supabase SQL Editoru.';
@@ -2061,27 +2139,55 @@
       return data || [];
     }
 
+    async function fetchWeights(fromDate, toDate) {
+      if (USE_MOCK) {
+        return mockFilterRows(mockGetTable('weight_entries'), 'recorded_at', fromDate, toDate);
+      }
+      let query = db
+        .from('weight_entries')
+        .select('*')
+        .eq('pin_hash', currentPinHash)
+        .order('recorded_at', { ascending: true });
+      if (fromDate) query = query.gte('recorded_at', fromDate.toISOString());
+      if (toDate) query = query.lte('recorded_at', toDate.toISOString());
+      const { data, error } = await query;
+      if (error) {
+        if (isMissingTableError(error, 'weight_entries')) {
+          console.warn('weight_entries tabela ne postoji — preskačem');
+          return [];
+        }
+        throw error;
+      }
+      return data || [];
+    }
+
     async function fetchAllData() {
       if (USE_MOCK) {
         const measurements = mockGetTable('measurements').filter(r => r.pin_hash === currentPinHash);
         const bowel = mockGetTable('bowel_movements').filter(r => r.pin_hash === currentPinHash);
         const probiotics = mockGetTable('probiotic_entries').filter(r => r.pin_hash === currentPinHash);
-        return { measurements, bowel, probiotics };
+        const weights = mockGetTable('weight_entries').filter(r => r.pin_hash === currentPinHash);
+        return { measurements, bowel, probiotics, weights };
       }
-      const [measurements, bowel, probiotics] = await Promise.all([
+      const [measurements, bowel, probiotics, weights] = await Promise.all([
         db.from('measurements').select('*').eq('pin_hash', currentPinHash).order('measured_at', { ascending: true }),
         db.from('bowel_movements').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true }),
-        db.from('probiotic_entries').select('*').eq('pin_hash', currentPinHash).order('taken_at', { ascending: true })
+        db.from('probiotic_entries').select('*').eq('pin_hash', currentPinHash).order('taken_at', { ascending: true }),
+        db.from('weight_entries').select('*').eq('pin_hash', currentPinHash).order('recorded_at', { ascending: true })
       ]);
       if (measurements.error) throw measurements.error;
       if (bowel.error) throw bowel.error;
       if (probiotics.error && !isMissingTableError(probiotics.error, 'probiotic_entries')) {
         throw probiotics.error;
       }
+      if (weights.error && !isMissingTableError(weights.error, 'weight_entries')) {
+        throw weights.error;
+      }
       return {
         measurements: measurements.data || [],
         bowel: bowel.data || [],
-        probiotics: probiotics.error ? [] : (probiotics.data || [])
+        probiotics: probiotics.error ? [] : (probiotics.data || []),
+        weights: weights.error ? [] : (weights.data || [])
       };
     }
 
@@ -2123,6 +2229,21 @@
       return db.from('probiotic_entries').insert(row);
     }
 
+    async function insertWeight(row) {
+      if (USE_MOCK) {
+        const rows = mockGetTable('weight_entries');
+        rows.push({ ...row, id: crypto.randomUUID(), created_at: new Date().toISOString() });
+        mockSaveTable('weight_entries', rows);
+        return { error: null };
+      }
+      return db.from('weight_entries').insert(row);
+    }
+
+    function formatWeight(kg) {
+      const n = Number(kg);
+      return Number.isInteger(n) ? String(n) : n.toFixed(1);
+    }
+
     // Danas view
     async function loadDanas() {
       const container = document.getElementById('danas-content');
@@ -2136,17 +2257,18 @@
         const tomorrow = new Date(todayStart);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const [measurements, bowel, probiotics] = await Promise.all([
+        const [measurements, bowel, probiotics, weights] = await Promise.all([
           fetchMeasurements(todayStart, tomorrow),
           fetchBowel(todayStart, tomorrow),
-          fetchProbiotics(todayStart, tomorrow)
+          fetchProbiotics(todayStart, tomorrow),
+          fetchWeights(todayStart, tomorrow)
         ]);
 
         let html = '';
         let hasCritical = false;
 
-        if (measurements.length === 0 && bowel.length === 0 && probiotics.length === 0) {
-          html = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>Nema mjerenja za danas.<br>Dodaj prvo mjerenje.</div>`;
+        if (measurements.length === 0 && bowel.length === 0 && probiotics.length === 0 && weights.length === 0) {
+          html = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>Nema unosa za danas.<br>Dodaj prvi unos.</div>`;
         } else {
           measurements.forEach(m => {
             const cls = classifyBP(m.systolic, m.diastolic);
@@ -2162,6 +2284,11 @@
           if (probiotics.length > 0) {
             html += '<div class="section-title section-title-accent" style="grid-column:1/-1">Probiotik</div>';
             probiotics.forEach(p => { html += renderProbioticCard(p); });
+          }
+
+          if (weights.length > 0) {
+            html += '<div class="section-title section-title-weight" style="grid-column:1/-1">Kilaža</div>';
+            weights.forEach(w => { html += renderWeightCard(w); });
           }
         }
 
@@ -2224,6 +2351,20 @@
         </div>`;
     }
 
+    function renderWeightCard(w) {
+      return `
+        <div class="card weight-card" data-id="${w.id}" data-type="weight">
+          <div class="measurement-top">
+            <span class="card-time">${formatTime(w.recorded_at)}</span>
+            <button class="delete-btn" data-id="${w.id}" data-type="weight" title="Obriši">🗑</button>
+          </div>
+          <div class="measurement-main">
+            <span class="weight-value">${formatWeight(w.weight_kg)} <span class="weight-unit">kg</span></span>
+          </div>
+          ${w.note ? `<div class="card-note">${escapeHtml(w.note)}</div>` : ''}
+        </div>`;
+    }
+
     function escapeHtml(str) {
       const div = document.createElement('div');
       div.textContent = str;
@@ -2259,30 +2400,37 @@
         startDate.setDate(startDate.getDate() - historijaDaysLoaded);
         startDate.setHours(0, 0, 0, 0);
 
-        const [measurements, bowel, probiotics] = await Promise.all([
+        const [measurements, bowel, probiotics, weights] = await Promise.all([
           fetchMeasurements(startDate, endDate),
           fetchBowel(startDate, endDate),
-          fetchProbiotics(startDate, endDate)
+          fetchProbiotics(startDate, endDate),
+          fetchWeights(startDate, endDate)
         ]);
 
         const dayMap = {};
 
         measurements.forEach(m => {
           const key = localDateKey(m.measured_at);
-          if (!dayMap[key]) dayMap[key] = { date: new Date(m.measured_at), measurements: [], bowel: [], probiotics: [] };
+          if (!dayMap[key]) dayMap[key] = { date: new Date(m.measured_at), measurements: [], bowel: [], probiotics: [], weights: [] };
           dayMap[key].measurements.push(m);
         });
 
         bowel.forEach(b => {
           const key = localDateKey(b.recorded_at);
-          if (!dayMap[key]) dayMap[key] = { date: new Date(b.recorded_at), measurements: [], bowel: [], probiotics: [] };
+          if (!dayMap[key]) dayMap[key] = { date: new Date(b.recorded_at), measurements: [], bowel: [], probiotics: [], weights: [] };
           dayMap[key].bowel.push(b);
         });
 
         probiotics.forEach(p => {
           const key = localDateKey(p.taken_at);
-          if (!dayMap[key]) dayMap[key] = { date: new Date(p.taken_at), measurements: [], bowel: [], probiotics: [] };
+          if (!dayMap[key]) dayMap[key] = { date: new Date(p.taken_at), measurements: [], bowel: [], probiotics: [], weights: [] };
           dayMap[key].probiotics.push(p);
+        });
+
+        weights.forEach(w => {
+          const key = localDateKey(w.recorded_at);
+          if (!dayMap[key]) dayMap[key] = { date: new Date(w.recorded_at), measurements: [], bowel: [], probiotics: [], weights: [] };
+          dayMap[key].weights.push(w);
         });
 
         const sortedDays = Object.keys(dayMap).sort((a, b) => b.localeCompare(a));
@@ -2307,7 +2455,7 @@
               <div class="day-header">
                 <div class="day-header-left">
                   <h3>${formatDateLong(day.date)}</h3>
-                  <div class="day-header-stats">${day.measurements.length} mjerenja · ${day.bowel.length} stolica · ${day.probiotics.length} probiotik</div>
+                  <div class="day-header-stats">${day.measurements.length} mjerenja · ${day.bowel.length} stolica · ${day.probiotics.length} probiotik · ${day.weights.length} kilaža</div>
                 </div>
                 <div style="text-align:right">
                   <div class="day-header-avg">${avgSys}/${avgDia}</div>
@@ -2319,6 +2467,7 @@
           day.measurements.forEach(m => { html += renderMeasurementCard(m); });
           day.bowel.forEach(b => { html += renderBowelCard(b); });
           day.probiotics.forEach(p => { html += renderProbioticCard(p); });
+          day.weights.forEach(w => { html += renderWeightCard(w); });
 
           html += '</div></div></div>';
         });
@@ -2352,7 +2501,7 @@
     }
 
     function buildExportCsv(data) {
-      const headers = ['tip', 'datum_vrijeme', 'gornji_pritisak', 'donji_pritisak', 'puls', 'tip_stolice', 'probiotici', 'biljeska'];
+      const headers = ['tip', 'datum_vrijeme', 'gornji_pritisak', 'donji_pritisak', 'puls', 'tip_stolice', 'probiotici', 'kilaza_kg', 'biljeska'];
       const rows = [];
 
       data.measurements.forEach(m => {
@@ -2364,6 +2513,7 @@
           puls: m.pulse,
           tip_stolice: '',
           probiotici: '',
+          kilaza_kg: '',
           biljeska: m.note || ''
         });
       });
@@ -2377,6 +2527,7 @@
           puls: '',
           tip_stolice: b.type,
           probiotici: '',
+          kilaza_kg: '',
           biljeska: b.note || ''
         });
       });
@@ -2391,7 +2542,22 @@
           puls: '',
           tip_stolice: '',
           probiotici: types.map(getProbioticLabel).join('; '),
+          kilaza_kg: '',
           biljeska: p.note || ''
+        });
+      });
+
+      (data.weights || []).forEach(w => {
+        rows.push({
+          tip: 'kilaza',
+          datum_vrijeme: w.recorded_at,
+          gornji_pritisak: '',
+          donji_pritisak: '',
+          puls: '',
+          tip_stolice: '',
+          probiotici: '',
+          kilaza_kg: w.weight_kg,
+          biljeska: w.note || ''
         });
       });
 
@@ -2563,6 +2729,42 @@
       return `<div class="stat-card"><h3>Stolica — prosjeci</h3>
         <table class="period-table"><thead><tr><th></th>${header}</tr></thead><tbody>${body}</tbody></table>
         <p class="chart-note">Tip 4 = normalno. Niži prosjek nakon probiotika može značiti poboljšanje ako ste imali kašasto (6–7).</p></div>`;
+    }
+
+    function avgWeightStats(items) {
+      if (!items.length) return { count: 0, avg: null, latest: null };
+      const avg = Math.round((items.reduce((s, w) => s + Number(w.weight_kg), 0) / items.length) * 10) / 10;
+      const latest = items.reduce((a, b) => new Date(a.recorded_at) > new Date(b.recorded_at) ? a : b);
+      return { count: items.length, avg, latest: Number(latest.weight_kg) };
+    }
+
+    function renderWeightPeriodTable(weights) {
+      if (!weights.length) return '';
+
+      const periods = ['yesterday', 'week', 'month'];
+      const labels = { yesterday: 'Jučer', week: '7 dana', month: '30 dana' };
+      const stats = {};
+      periods.forEach(p => {
+        stats[p] = avgWeightStats(filterInPeriod(weights, 'recorded_at', p));
+      });
+
+      const body = [
+        {
+          label: 'Prosjek (kg)',
+          render: p => renderPeriodCell(stats[p].avg != null ? formatWeight(stats[p].avg) : '—', stats[p].count ? `${stats[p].count} un.` : null)
+        },
+        {
+          label: 'Zadnja (kg)',
+          render: p => renderPeriodCell(stats[p].latest != null ? formatWeight(stats[p].latest) : '—', null)
+        }
+      ].map(row => {
+        const cells = periods.map(p => row.render(p)).join('');
+        return `<tr><td>${row.label}</td>${cells}</tr>`;
+      }).join('');
+
+      const header = periods.map(p => `<th>${labels[p]}</th>`).join('');
+      return `<div class="stat-card"><h3>Kilaža — prosjeci</h3>
+        <table class="period-table"><thead><tr><th></th>${header}</tr></thead><tbody>${body}</tbody></table></div>`;
     }
 
     function analyzeProbioticBowel(probiotics, bowel) {
@@ -2784,13 +2986,14 @@
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 90);
 
-        const [measurements, bowel, probiotics] = await Promise.all([
+        const [measurements, bowel, probiotics, weights] = await Promise.all([
           fetchMeasurements(startDate, endDate),
           fetchBowel(startDate, endDate),
-          fetchProbiotics(startDate, endDate)
+          fetchProbiotics(startDate, endDate),
+          fetchWeights(startDate, endDate)
         ]);
 
-        const hasAnyData = measurements.length || bowel.length || probiotics.length;
+        const hasAnyData = measurements.length || bowel.length || probiotics.length || weights.length;
         if (!hasAnyData) {
           container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 7l-8.5 8.5-4-4L2 17"/></svg></div>Nema dovoljno podataka za trendove.<br>Dodajte unose.</div>';
           return;
@@ -2799,6 +3002,7 @@
         let html = '';
         html += renderBPPeriodTable(measurements);
         html += renderBowelPeriodTable(bowel);
+        html += renderWeightPeriodTable(weights);
         html += renderBPCategoryChart(measurements);
 
         const analysis = analyzeProbioticBowel(probiotics, bowel);
@@ -2899,12 +3103,23 @@
       openModal('modal-probiotic');
     }
 
+    function openWeightModal() {
+      showFieldError('err-weight', null);
+      showFieldError('err-weight-datetime', null);
+      document.getElementById('w-weight').value = '';
+      document.getElementById('w-note').value = '';
+      document.getElementById('w-datetime').value = toLocalDatetimeValue(new Date());
+      openModal('modal-weight');
+    }
+
     document.getElementById('fab-measurement').addEventListener('click', openMeasurementModal);
     document.getElementById('desk-fab-measurement').addEventListener('click', openMeasurementModal);
     document.getElementById('fab-bowel').addEventListener('click', openBowelModal);
     document.getElementById('desk-fab-bowel').addEventListener('click', openBowelModal);
     document.getElementById('fab-probiotic').addEventListener('click', openProbioticModal);
     document.getElementById('desk-fab-probiotic').addEventListener('click', openProbioticModal);
+    document.getElementById('fab-weight').addEventListener('click', openWeightModal);
+    document.getElementById('desk-fab-weight').addEventListener('click', openWeightModal);
 
     function renderBowelGrid() {
       const grid = document.getElementById('bowel-grid');
@@ -3036,6 +3251,37 @@
 
       if (error) { alert('Greška pri spremanju.'); return; }
       closeModal('modal-probiotic');
+      if (currentView === 'danas') loadDanas();
+      else switchView('danas');
+    });
+
+    document.getElementById('form-weight').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showFieldError('err-weight', null);
+      showFieldError('err-weight-datetime', null);
+
+      const weight = parseFloat(document.getElementById('w-weight').value);
+      const note = document.getElementById('w-note').value.trim();
+      const dt = document.getElementById('w-datetime').value;
+
+      if (isNaN(weight) || weight < 30 || weight > 300) {
+        showFieldError('err-weight', 'Unesite težinu između 30 i 300 kg.');
+        return;
+      }
+      if (!dt) {
+        showFieldError('err-weight-datetime', 'Odaberite datum i vrijeme.');
+        return;
+      }
+
+      const { error } = await insertWeight({
+        recorded_at: new Date(dt).toISOString(),
+        weight_kg: Math.round(weight * 10) / 10,
+        note: note || null,
+        pin_hash: currentPinHash
+      });
+
+      if (error) { alert('Greška pri spremanju.'); return; }
+      closeModal('modal-weight');
       if (currentView === 'danas') loadDanas();
       else switchView('danas');
     });

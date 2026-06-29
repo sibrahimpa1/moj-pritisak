@@ -33,16 +33,29 @@ create table probiotic_entries (
   created_at timestamptz default now()
 );
 
+-- Weight entries table
+create table weight_entries (
+  id uuid default uuid_generate_v4() primary key,
+  recorded_at timestamptz not null,
+  weight_kg numeric(5, 1) not null check (weight_kg between 30 and 300),
+  note text,
+  pin_hash text not null,
+  created_at timestamptz default now()
+);
+
 -- Indexes for date filtering
 create index on measurements (measured_at desc);
 create index on bowel_movements (recorded_at desc);
 create index on probiotic_entries (taken_at desc);
+create index on weight_entries (recorded_at desc);
 
 -- Row Level Security: allow all operations (PIN filtering done in app)
 alter table measurements enable row level security;
 alter table bowel_movements enable row level security;
 alter table probiotic_entries enable row level security;
+alter table weight_entries enable row level security;
 
 create policy "Public access" on measurements for all using (true);
 create policy "Public access" on bowel_movements for all using (true);
 create policy "Public access" on probiotic_entries for all using (true);
+create policy "Public access" on weight_entries for all using (true);
