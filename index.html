@@ -71,7 +71,9 @@
       --danger: #DC2626;
       --nav-height: 72px;
       --sidebar-width: 280px;
-      --fab-bottom: calc(var(--nav-height) + 20px);
+      --fab-bar-height: 36px;
+      --fab-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+      --bottom-stack: calc(var(--nav-height) + var(--fab-bar-height) + env(safe-area-inset-bottom, 0px));
     }
 
     html { height: 100%; }
@@ -249,7 +251,11 @@
     #main-app {
       display: flex;
       min-height: 100vh;
-      padding-bottom: var(--nav-height);
+      padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+    }
+
+    #main-app.has-fab-bar {
+      padding-bottom: var(--bottom-stack);
     }
 
     .app-sidebar {
@@ -358,7 +364,7 @@
     /* Views */
     .view {
       display: none;
-      padding: 0 0 120px;
+      padding: 0 0 16px;
       opacity: 0;
       transition: opacity 0.25s ease;
     }
@@ -632,26 +638,24 @@
       box-shadow: var(--shadow-md);
     }
 
-    /* FABs — mobile (inline row) */
+    /* Action pills — mobile bar above nav */
     .fab-container {
       position: fixed;
       bottom: var(--fab-bottom);
-      left: 12px;
-      right: 12px;
+      left: 0;
+      right: 0;
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
-      gap: 8px;
-      z-index: 50;
-      overflow-x: auto;
-      padding: 4px 0;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      gap: 6px;
+      z-index: 45;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8px 10px;
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04);
     }
-
-    .fab-container::-webkit-scrollbar { display: none; }
 
     .fab {
       border: none;
@@ -659,58 +663,52 @@
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
-      box-shadow: var(--shadow-md);
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: opacity 0.2s, background 0.2s, border-color 0.2s;
       white-space: nowrap;
       flex-shrink: 0;
+      font-size: 10px;
+      line-height: 1.2;
+      padding: 6px 10px;
+      box-shadow: none;
     }
 
     .fab:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
+      opacity: 0.92;
     }
 
     .fab-primary {
       background: var(--primary);
       color: white;
-      padding: 10px 14px;
-      font-size: 13px;
     }
 
     .fab-secondary {
       background: var(--surface);
       color: var(--primary);
-      border: 1.5px solid var(--primary);
-      padding: 10px 14px;
-      font-size: 13px;
+      border: 1px solid var(--primary);
     }
 
     .fab-tertiary {
       background: var(--accent-soft);
       color: var(--accent-dark);
-      border: 1.5px solid var(--accent-mid);
-      padding: 10px 14px;
-      font-size: 13px;
+      border: 1px solid var(--accent-mid);
     }
 
     .fab-tertiary:hover {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border-color: var(--accent-mid);
     }
 
     .fab-quaternary {
       background: #EEF2FF;
       color: #4338CA;
-      border: 1.5px solid #A5B4FC;
-      padding: 10px 14px;
-      font-size: 13px;
+      border: 1px solid #A5B4FC;
     }
 
     .fab-quaternary:hover {
-      background: #4338CA;
-      color: white;
-      border-color: #4338CA;
+      background: #EEF2FF;
+      color: #4338CA;
+      border-color: #A5B4FC;
     }
 
     .weight-card { padding: 16px 20px; }
@@ -1491,6 +1489,10 @@
         align-items: center;
       }
 
+      #main-app {
+        padding-bottom: 0;
+      }
+
       .fab-container { display: none; }
 
       .error-banner,
@@ -2052,6 +2054,7 @@
     function showMainApp() {
       document.getElementById('pin-screen').classList.add('hidden');
       document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('main-app').classList.toggle('has-fab-bar', currentView === 'danas');
       document.getElementById('danas-date').textContent = formatDateLong(new Date());
       loadCurrentView();
     }
@@ -2072,6 +2075,7 @@
       viewEl.classList.add('active');
       requestAnimationFrame(() => viewEl.style.opacity = '1');
       document.getElementById('fab-container').classList.toggle('hidden', view !== 'danas');
+      document.getElementById('main-app').classList.toggle('has-fab-bar', view === 'danas');
       loadCurrentView();
     }
 
