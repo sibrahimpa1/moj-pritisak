@@ -71,9 +71,9 @@
       --danger: #DC2626;
       --nav-height: 72px;
       --sidebar-width: 280px;
-      --fab-bar-height: 36px;
+      --fab-bar-height: 42px;
       --fab-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
-      --bottom-stack: calc(var(--nav-height) + var(--fab-bar-height) + env(safe-area-inset-bottom, 0px));
+      --bottom-stack: calc(var(--nav-height) + var(--fab-bar-height) + env(safe-area-inset-bottom, 0px) + 12px);
     }
 
     html { height: 100%; }
@@ -638,24 +638,32 @@
       box-shadow: var(--shadow-md);
     }
 
-    /* Action pills — mobile bar above nav */
-    .fab-container {
+    /* Bottom dock — action bar + nav as one fixed unit */
+    .bottom-dock {
       position: fixed;
-      bottom: var(--fab-bottom);
+      bottom: 0;
       left: 0;
       right: 0;
+      z-index: 50;
+      background: var(--surface);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .fab-container {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
       gap: 6px;
-      z-index: 45;
       background: var(--surface);
       border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       padding: 8px 10px;
-      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04);
+      min-height: var(--fab-bar-height);
     }
+
+    .fab-container.hidden { display: none; }
 
     .fab {
       border: none;
@@ -731,17 +739,14 @@
 
     /* Navigation */
     .app-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      position: relative;
       height: var(--nav-height);
       background: var(--surface);
-      border-top: 1px solid var(--border);
+      border-top: none;
       display: flex;
       z-index: 40;
-      padding-bottom: env(safe-area-inset-bottom);
-      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
+      padding-bottom: 0;
+      box-shadow: none;
     }
 
     .nav-brand { display: none; }
@@ -1493,6 +1498,13 @@
         padding-bottom: 0;
       }
 
+      .bottom-dock {
+        position: static;
+        height: 0;
+        overflow: visible;
+        padding-bottom: 0;
+      }
+
       .fab-container { display: none; }
 
       .error-banner,
@@ -1582,21 +1594,6 @@
         </div>
       </aside>
 
-      <nav class="app-nav">
-        <button class="nav-tab active" data-view="danas">
-          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
-          <span>Danas</span>
-        </button>
-        <button class="nav-tab" data-view="historija">
-          <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
-          <span>Historija</span>
-        </button>
-        <button class="nav-tab" data-view="trendovi">
-          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 7l-8.5 8.5-4-4L2 17"/><path d="M16 7h6v6"/></svg></span>
-          <span>Trendovi</span>
-        </button>
-      </nav>
-
       <div class="app-main">
       <div id="error-banner" class="error-banner hidden">
         <span id="error-banner-text">Greška pri učitavanju. Provjeri internet vezu.</span>
@@ -1649,14 +1646,30 @@
         <div id="trendovi-content"></div>
       </div>
 
-      <!-- FABs (mobile) -->
-      <div class="fab-container" id="fab-container">
-        <button class="fab fab-primary" id="fab-measurement">+ Pritisak</button>
-        <button class="fab fab-secondary" id="fab-bowel">+ Stolica</button>
-        <button class="fab fab-tertiary" id="fab-probiotic">+ Probiotik</button>
-        <button class="fab fab-quaternary" id="fab-weight">+ Kilaža</button>
-      </div>
       </div><!-- .app-main -->
+
+      <div class="bottom-dock" id="bottom-dock">
+        <div class="fab-container" id="fab-container">
+          <button class="fab fab-primary" id="fab-measurement">+ Pritisak</button>
+          <button class="fab fab-secondary" id="fab-bowel">+ Stolica</button>
+          <button class="fab fab-tertiary" id="fab-probiotic">+ Probiotik</button>
+          <button class="fab fab-quaternary" id="fab-weight">+ Kilaža</button>
+        </div>
+        <nav class="app-nav">
+          <button class="nav-tab active" data-view="danas">
+            <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+            <span>Danas</span>
+          </button>
+          <button class="nav-tab" data-view="historija">
+            <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+            <span>Historija</span>
+          </button>
+          <button class="nav-tab" data-view="trendovi">
+            <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 7l-8.5 8.5-4-4L2 17"/><path d="M16 7h6v6"/></svg></span>
+            <span>Trendovi</span>
+          </button>
+        </nav>
+      </div>
     </div>
   </div>
 
